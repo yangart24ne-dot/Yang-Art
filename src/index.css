@@ -1,16 +1,163 @@
-/* ── Anek Devanagari – Body Text ─────────────────────────── */
+/* ── Anek Devanagari – Body Text, Captions & Highlights ───── */
 @font-face {
   font-family: 'AnekDevanagari';
   src: url('./assets/font/Anek_Devanagari (1)/AnekDevanagari-VariableFont_wdth,wght.ttf') format('truetype');
-  font-weight: 100 800;
+  font-weight: 100 900;
   font-style: normal;
   font-display: swap;
 }
 
-/* ── Malinton – Main Headings ────────────────────────────── */
+@font-face {
+  font-family: 'AnekDevanagari';
+  src: url('./assets/font/Anek_Devanagari (1)/static/AnekDevanagari-Thin.ttf') format('truetype');
+  font-weight: 100;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'AnekDevanagari';
+  src: url('./assets/font/Anek_Devanagari (1)/static/AnekDevanagari-ExtraLight.ttf') format('truetype');
+  font-weight: 200;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'AnekDevanagari';
+  src: url('./assets/font/Anek_Devanagari (1)/static/AnekDevanagari-Light.ttf') format('truetype');
+  font-weight: 300;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'AnekDevanagari';
+  src: url('./assets/font/Anek_Devanagari (1)/static/AnekDevanagari-Regular.ttf') format('truetype');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'AnekDevanagari';
+  src: url('./assets/font/Anek_Devanagari (1)/static/AnekDevanagari-Medium.ttf') format('truetype');
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'AnekDevanagari';
+  src: url('./assets/font/Anek_Devanagari (1)/static/AnekDevanagari-SemiBold.ttf') format('truetype');
+  font-weight: 600;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'AnekDevanagari';
+  src: url('./assets/font/Anek_Devanagari (1)/static/AnekDevanagari-Bold.ttf') format('truetype');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'AnekDevanagari';
+  src: url('./assets/font/Anek_Devanagari (1)/static/AnekDevanagari-ExtraBold.ttf') format('truetype');
+  font-weight: 800;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* ── DFVN Malinton – Headings & Display Titles ─────────────── */
+@font-face {
+  font-family: 'DFVNMalinton';
+  src: url('./assets/font/DFVNMalinton/OTF/DFVN-Malinton-Thin.otf') format('opentype'),
+       url('./assets/font/DFVNMalinton/TTF/DFVN-Malinton-Thin.ttf') format('truetype');
+  font-weight: 100;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'DFVNMalinton';
+  src: url('./assets/font/DFVNMalinton/OTF/DFVN-Malinton-ExtraLight.otf') format('opentype'),
+       url('./assets/font/DFVNMalinton/TTF/DFVN-Malinton-ExtraLight.ttf') format('truetype');
+  font-weight: 200;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'DFVNMalinton';
+  src: url('./assets/font/DFVNMalinton/OTF/DFVN-Malinton-Light.otf') format('opentype'),
+       url('./assets/font/DFVNMalinton/TTF/DFVN-Malinton-Light.ttf') format('truetype');
+  font-weight: 300;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'DFVNMalinton';
+  src: url('./assets/font/DFVNMalinton/OTF/DFVN-Malinton-Regular.otf') format('opentype'),
+       url('./assets/font/DFVNMalinton/TTF/DFVN-Malinton-Regular.ttf') format('truetype');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'DFVNMalinton';
+  src: url('./assets/font/DFVNMalinton/OTF/DFVN-Malinton-Medium.otf') format('opentype'),
+       url('./assets/font/DFVNMalinton/TTF/DFVN-Malinton-Medium.ttf') format('truetype');
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'DFVNMalinton';
+  src: url('./assets/font/DFVNMalinton/OTF/DFVN-Malinton-SemiBold.otf') format('opentype'),
+       url('./assets/font/DFVNMalinton/TTF/DFVN-Malinton-SemiBold.ttf') format('truetype');
+  font-weight: 600;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'DFVNMalinton';
+  src: url('./assets/font/DFVNMalinton/OTF/DFVN-Malinton-Bold.otf') format('opentype'),
+       url('./assets/font/DFVNMalinton/TTF/DFVN-Malinton-Bold.ttf') format('truetype');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'DFVNMalinton';
+  src: url('./assets/font/DFVNMalinton/OTF/DFVN-Malinton-ExtraBold.otf') format('opentype'),
+       url('./assets/font/DFVNMalinton/TTF/DFVN-Malinton-ExtraBold.ttf') format('truetype');
+  font-weight: 800;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'DFVNMalinton';
+  src: url('./assets/font/DFVNMalinton/OTF/DFVN-Malinton-Black.otf') format('opentype'),
+       url('./assets/font/DFVNMalinton/TTF/DFVN-Malinton-Black.ttf') format('truetype');
+  font-weight: 900;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* Alias 'Malinton' for complete backward compatibility */
 @font-face {
   font-family: 'Malinton';
-  src: url('./assets/font/malinton-font-family/MalintonTrialVersion-Thin-BF672accc4ba602.otf') format('opentype');
+  src: url('./assets/font/DFVNMalinton/OTF/DFVN-Malinton-Thin.otf') format('opentype'),
+       url('./assets/font/DFVNMalinton/TTF/DFVN-Malinton-Thin.ttf') format('truetype');
   font-weight: 100;
   font-style: normal;
   font-display: swap;
@@ -18,7 +165,8 @@
 
 @font-face {
   font-family: 'Malinton';
-  src: url('./assets/font/malinton-font-family/MalintonTrialVersion-ExtLt-BF672accc4840cc.otf') format('opentype');
+  src: url('./assets/font/DFVNMalinton/OTF/DFVN-Malinton-ExtraLight.otf') format('opentype'),
+       url('./assets/font/DFVNMalinton/TTF/DFVN-Malinton-ExtraLight.ttf') format('truetype');
   font-weight: 200;
   font-style: normal;
   font-display: swap;
@@ -26,7 +174,8 @@
 
 @font-face {
   font-family: 'Malinton';
-  src: url('./assets/font/malinton-font-family/MalintonTrialVersion-Light-BF672accc490f40.otf') format('opentype');
+  src: url('./assets/font/DFVNMalinton/OTF/DFVN-Malinton-Light.otf') format('opentype'),
+       url('./assets/font/DFVNMalinton/TTF/DFVN-Malinton-Light.ttf') format('truetype');
   font-weight: 300;
   font-style: normal;
   font-display: swap;
@@ -34,7 +183,8 @@
 
 @font-face {
   font-family: 'Malinton';
-  src: url('./assets/font/malinton-font-family/MalintonTrialVersion-Regular-BF672accc4a43ea.otf') format('opentype');
+  src: url('./assets/font/DFVNMalinton/OTF/DFVN-Malinton-Regular.otf') format('opentype'),
+       url('./assets/font/DFVNMalinton/TTF/DFVN-Malinton-Regular.ttf') format('truetype');
   font-weight: 400;
   font-style: normal;
   font-display: swap;
@@ -42,7 +192,8 @@
 
 @font-face {
   font-family: 'Malinton';
-  src: url('./assets/font/malinton-font-family/MalintonTrialVersion-Medium-BF672accc49bfb7.otf') format('opentype');
+  src: url('./assets/font/DFVNMalinton/OTF/DFVN-Malinton-Medium.otf') format('opentype'),
+       url('./assets/font/DFVNMalinton/TTF/DFVN-Malinton-Medium.ttf') format('truetype');
   font-weight: 500;
   font-style: normal;
   font-display: swap;
@@ -50,7 +201,8 @@
 
 @font-face {
   font-family: 'Malinton';
-  src: url('./assets/font/malinton-font-family/MalintonTrialVersion-SemiBold-BF672accc4b3224.otf') format('opentype');
+  src: url('./assets/font/DFVNMalinton/OTF/DFVN-Malinton-SemiBold.otf') format('opentype'),
+       url('./assets/font/DFVNMalinton/TTF/DFVN-Malinton-SemiBold.ttf') format('truetype');
   font-weight: 600;
   font-style: normal;
   font-display: swap;
@@ -58,7 +210,8 @@
 
 @font-face {
   font-family: 'Malinton';
-  src: url('./assets/font/malinton-font-family/MalintonTrialVersion-Bold-BF672accc4407ad.otf') format('opentype');
+  src: url('./assets/font/DFVNMalinton/OTF/DFVN-Malinton-Bold.otf') format('opentype'),
+       url('./assets/font/DFVNMalinton/TTF/DFVN-Malinton-Bold.ttf') format('truetype');
   font-weight: 700;
   font-style: normal;
   font-display: swap;
@@ -66,7 +219,8 @@
 
 @font-face {
   font-family: 'Malinton';
-  src: url('./assets/font/malinton-font-family/MalintonTrialVersion-ExtBd-BF672accc44ebf4.otf') format('opentype');
+  src: url('./assets/font/DFVNMalinton/OTF/DFVN-Malinton-ExtraBold.otf') format('opentype'),
+       url('./assets/font/DFVNMalinton/TTF/DFVN-Malinton-ExtraBold.ttf') format('truetype');
   font-weight: 800;
   font-style: normal;
   font-display: swap;
@@ -74,18 +228,11 @@
 
 @font-face {
   font-family: 'Malinton';
-  src: url('./assets/font/malinton-font-family/MalintonTrialVersion-Black-BF672accc40a7c9.otf') format('opentype');
+  src: url('./assets/font/DFVNMalinton/OTF/DFVN-Malinton-Black.otf') format('opentype'),
+       url('./assets/font/DFVNMalinton/TTF/DFVN-Malinton-Black.ttf') format('truetype');
   font-weight: 900;
   font-style: normal;
   font-display: swap;
-}
-
-/* ── Legacy fonts (giữ lại để tương thích) ──────────────── */
-@font-face {
-  font-family: 'FSEX300';
-  src: url('./assets/font/FSEX300.ttf') format('truetype');
-  font-weight: normal;
-  font-style: normal;
 }
 
 @import "tailwindcss";
@@ -103,7 +250,7 @@
   --container-max-width-narrow: 1024px;
   --container-max-width-standard: 1280px;
   --container-max-width-wide: 1440px;
-  --container-max-width-full: 1920px;
+  --container-max-width-full: 100%;
 
   /* ⚖️ ALIGNMENT & BIAS RULES */
   --layout-left-margin: 0px;
@@ -137,10 +284,10 @@
 }
 
 @theme {
-  /* Fonts */
-  --font-sans: "AnekDevanagari", ui-sans-serif, system-ui, sans-serif;
-  --font-display: "Malinton", sans-serif;
-  --font-mono: "FSEX300", ui-monospace, SFMono-Regular, monospace;
+  /* Fonts quy chuẩn từ src/assets/font */
+  --font-sans: 'AnekDevanagari', sans-serif;
+  --font-display: 'DFVNMalinton', 'Malinton', sans-serif;
+  --font-mono: 'AnekDevanagari', monospace;
 
   /* ═══ MÀU CHÍNH (PRIMARY) ═══════════════════════════════ */
   --color-brand-blue: #0020D7;
@@ -181,9 +328,10 @@
 
 @layer base {
   body {
-    /* Nền trắng, chữ đen — đúng bảng màu thương hiệu */
+    /* Nền trắng, chữ đen, font AnekDevanagari — đúng quy định thương hiệu */
     background-color: var(--color-brand-white);
     color: var(--color-brand-black);
+    font-family: var(--font-sans);
     overflow-x: hidden;
   }
 
@@ -263,10 +411,10 @@
     border-bottom: 2px solid color-mix(in srgb, var(--color-brand-blue) 40%, transparent);
   }
 
-  /* ── Typography helpers ── */
   .lcd-text {
-    font-family: "FSEX300", monospace;
-    letter-spacing: -0.05em;
+    font-family: "AnekDevanagari", sans-serif;
+    font-weight: 800;
+    letter-spacing: -0.03em;
   }
 
   .magic-headline {
@@ -325,6 +473,40 @@
 .animate-float {
   animation: float 4s ease-in-out infinite;
   will-change: transform;
+}
+
+@keyframes bannerFloatStep1 {
+  0%, 100% {
+    transform: translate3d(0, 0px, 0);
+  }
+  50% {
+    transform: translate3d(0, -8px, 0);
+  }
+}
+
+@keyframes bannerFloatStep2 {
+  0%, 100% {
+    transform: translate3d(0, -8px, 0);
+  }
+  50% {
+    transform: translate3d(0, 0px, 0);
+  }
+}
+
+.banner-float-step1 {
+  animation: bannerFloatStep1 3.6s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+  will-change: transform;
+  transform: translateZ(0);
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+}
+
+.banner-float-step2 {
+  animation: bannerFloatStep2 3.6s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+  will-change: transform;
+  transform: translateZ(0);
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
 }
 
 /* Fix 3D canvas misalignment due to CSS scale transform on the container */

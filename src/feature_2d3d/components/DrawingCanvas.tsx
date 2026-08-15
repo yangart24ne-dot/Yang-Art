@@ -17,7 +17,7 @@ import assetSizeLabel from '../../assets/info workshop/SVG/Asset 38.svg';
 import assetTrashIcon from '../../assets/info workshop/SVG/Asset 40.svg';
 import assetUndoIcon from '../../assets/info workshop/SVG/Asset 41.svg';
 import assetRedoIcon from '../../assets/info workshop/SVG/Asset 42.svg';
-import assetCharacter from '../../assets/info workshop/SVG/Asset 43.svg';
+import assetCharacter from '../../assets/mascot active/Asset 84.svg';
 import assetSelectBasePrompt from '../../assets/info workshop/SVG/Asset 44.svg';
 import assetGenerate3D from '../../assets/info workshop/SVG/Asset 47.svg';
 import assetCanvasFrame from '../../assets/info workshop/SVG/Asset 46.svg';
@@ -879,8 +879,8 @@ export const DrawingCanvas: React.FC<DrawingCanvasProps> = ({
             >
               <img
                 src={assetCharacter}
-                className="w-32 h-auto object-contain select-none pointer-events-none"
-                alt="Yang Studio Mascot"
+                className="w-40 max-w-full h-auto object-contain select-none pointer-events-none"
+                alt="Yang Studio Mascot Asset 84"
               />
             </div>
           </div>

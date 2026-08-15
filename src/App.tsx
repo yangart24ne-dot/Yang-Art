@@ -22,7 +22,7 @@ export default function App() {
       case "home": return <Home onNavigate={setActivePage} />;
       case "about": return <AboutUs />;
       case "communicate": return <Communicate />;
-      case "workshop": return <Workshop />;
+      case "workshop": return <Workshop onNavigate={setActivePage} />;
       case "material": return <Material />;
       case "store": return <Store />;
       case "admin": return <Admin />;
@@ -59,13 +59,7 @@ export default function App() {
         <PetSelector />
         <LayoutGridGuide />
 
-        {/* Chỉ Báo Trạng Thái Hệ Thống */}
-        <div className="fixed bottom-24 right-8 z-[120] hidden md:block">
-          <div className="bg-black text-[#A7F417] font-mono text-[10px] px-3 py-1 brutalist-border flex items-center gap-2 shadow-[4px_4px_0px_#000]">
-            <span className="w-1.5 h-1.5 bg-[#A7F417] rounded-full animate-ping"></span>
-            SYS_ONLINE_V.4.2.0 // {activePage.toUpperCase()}
-          </div>
-        </div>
+
       </main>
     </PetProvider>
   );

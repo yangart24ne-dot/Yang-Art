@@ -59,10 +59,13 @@ export default function LayoutGridGuide() {
     return () => window.removeEventListener("resize", fn);
   }, []);
 
-  /* Ctrl + G */
+  /* Hotkey: Shift + G or Ctrl + G */
   useEffect(() => {
     const fn = (e: KeyboardEvent) => {
-      if (e.ctrlKey && e.key.toLowerCase() === "g") { e.preventDefault(); setVisible(v => !v); }
+      if ((e.shiftKey || e.ctrlKey) && e.key.toLowerCase() === "g") {
+        e.preventDefault();
+        setVisible(v => !v);
+      }
     };
     window.addEventListener("keydown", fn);
     return () => window.removeEventListener("keydown", fn);
@@ -99,26 +102,8 @@ export default function LayoutGridGuide() {
   // startX = margin (trái), endX = vw - margin (phải) → luôn đối xứng
   const startX = cfg.margin;
 
-  /* ─── nút OFF ─── */
-  if (!visible) return ReactDOM.createPortal(
-    <div style={{ position: "fixed", bottom: 90, right: 28, zIndex: 3000 }}>
-      <button
-        onClick={() => setVisible(true)}
-        title="Layout Grid  (Ctrl + G)"
-        style={{
-          display: "flex", alignItems: "center", gap: 6,
-          fontFamily: "monospace", fontSize: 9, letterSpacing: "0.12em",
-          background: "#111", color: "#FF0000",
-          border: "2px solid #FF0000", padding: "5px 11px",
-          cursor: "pointer", boxShadow: "3px 3px 0 #FF0000",
-          textTransform: "uppercase",
-        }}
-      >
-        <Grid size={11} /> GRID: OFF
-      </button>
-    </div>,
-    document.body
-  );
+  /* ─── Ẩn hoàn toàn khi không bật (chỉ dùng hotkey Shift+G để bật) ─── */
+  if (!visible) return null;
 
   /* ─── main ─── */
   return ReactDOM.createPortal(
@@ -197,7 +182,7 @@ export default function LayoutGridGuide() {
           <span style={{ display: "flex", alignItems: "center", gap: 7, fontSize: 10, fontWeight: "bold", color: "#ccc", letterSpacing: "0.05em" }}>
             <Grid size={13} style={{ color: "#FF0000" }} />
             Columns
-            <span style={{ fontSize: 8, color: "rgba(255,255,255,0.25)" }}>Ctrl+G</span>
+            <span style={{ fontSize: 8, color: "rgba(255,255,255,0.25)" }}>Shift+G</span>
           </span>
           <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
             <Move size={10} style={{ color: "rgba(255,255,255,0.18)" }} />

@@ -33,17 +33,17 @@ const NAV_ITEMS = [
 
 // CẤU HÌNH NAVBAR CHUNG
 const NAV_CONFIG = {
-  fontSize: "15px",       // Chỉnh kích thước chữ tổng thể tại đây
-  px: "35px",             // Chỉnh khoảng cách ngang các trang (cách đều nhau)
-  letterSpacing: "0.15em", // Chỉnh độ thưa của chữ tại đây
+  fontSize: "14px",       // Chỉnh kích thước chữ tổng thể tại đây
+  px: "24px",             // Chỉnh khoảng cách ngang các trang (cách đều nhau)
+  letterSpacing: "0.1em", // Chỉnh độ thưa của chữ tại đây
 
   // Cấu hình Logo
   logoScale: 1.0,         // Tỉ lệ scale logo (ví dụ: 1.0 = 100%, 0.85 = 85%)
-  logoOffsetX: -93,         // Dịch chuyển ngang logo (px, ví dụ: 0 là sát lề trái, -10, 20) 
+  logoOffsetX: 0,         // Dịch chuyển ngang logo chuẩn lề trái container
 
   // Cấu hình Khoảng Cách Các Phần Tử Bên Phải (Tìm kiếm, Giỏ hàng, Login)
-  rightGap: "30px",       // Khoảng cách cách đều nhau giữa các phần tử bên phải
-  rightOffsetX: 94,        // Dịch chuyển ngang cụm bên phải (px, ví dụ: 0 là sát lề phải, -10, 20)
+  rightGap: "20px",       // Khoảng cách cách đều nhau giữa các phần tử bên phải
+  rightOffsetX: 0,        // Dịch chuyển ngang cụm bên phải chuẩn lề phải container
 };
 
 export default function Navbar({ activePage, onNavigate }: NavbarProps) {
@@ -52,7 +52,7 @@ export default function Navbar({ activePage, onNavigate }: NavbarProps) {
   const [logoHovered, setLogoHovered] = useState(false);
 
   return (
-    <header className="fixed top-0 left-0 w-full z-[100] flex flex-col">
+    <header className="fixed top-0 left-0 w-full z-[10000] flex flex-col">
       {/* Dòng Chữ Chạy Trên Đầu Navbar */}
       <MarqueeTicker activePage={activePage} />
 
@@ -136,7 +136,7 @@ export default function Navbar({ activePage, onNavigate }: NavbarProps) {
                 "hidden sm:flex items-center px-3 py-1 gap-2 group transition-all",
                 isAboutPage
                   ? "bg-[#FF009C]/10 border border-[#FF009C]/40 focus-within:border-[#D1FF00]"
-                  : "bg-[#0020D7]/5 border border-[#0020D7]/30 focus-within:border-[#FF009C]"
+                  : "bg-[#0020D7] text-white border border-[#0020D7] focus-within:border-[#FF009C]"
               )}>
                 <Search
                   size={14}
@@ -144,7 +144,7 @@ export default function Navbar({ activePage, onNavigate }: NavbarProps) {
                     "transition-colors",
                     isAboutPage
                       ? "text-[#FF009C] group-focus-within:text-[#D1FF00]"
-                      : "text-[#0020D7]/60 group-focus-within:text-[#FF009C]"
+                      : "text-white/80 group-focus-within:text-[#FF009C]"
                   )}
                 />
                 <input
@@ -154,7 +154,7 @@ export default function Navbar({ activePage, onNavigate }: NavbarProps) {
                     "bg-transparent border-none outline-none font-display font-bold text-[10px] w-24 md:w-32",
                     isAboutPage
                       ? "text-[#FF009C] placeholder:text-[#FF009C]/60 focus:placeholder:text-[#D1FF00]/60"
-                      : "text-[#0020D7] placeholder:text-[#FF009C]/40"
+                      : "text-white placeholder:text-white/70"
                   )}
                 />
               </div>

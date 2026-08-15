@@ -15,7 +15,7 @@ const sampleText = (text: string, width: number, height: number) => {
   canvas.height = height;
   ctx.fillStyle = 'white';
   // Industrial bold font
-  ctx.font = '900 120px "FSEX300", "Impact", sans-serif';
+  ctx.font = '900 120px "Malinton", "AnekDevanagari", sans-serif';
   ctx.textAlign = 'center';
   ctx.textBaseline = 'middle';
   

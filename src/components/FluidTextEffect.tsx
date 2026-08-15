@@ -702,22 +702,21 @@ export default function FluidTextEffect({
   return (
     <div
       ref={containerRef}
-      className={`relative w-full overflow-visible flex items-center justify-center ${className}`}
-      style={{ height: `${letterHeight}px`, zIndex: isInteracting ? 50 : 1 }}
       onPointerEnter={handlePointerEnter}
       onPointerLeave={handlePointerLeave}
       onPointerMove={handlePointerMove}
       onClick={handleClick}
+      className={`relative w-full overflow-visible flex items-center justify-center cursor-pointer ${className}`}
+      style={{ height: `${letterHeight}px`, zIndex: 1 }}
     >
-      {/* 1. WebGL living liquid/energy canvas overlay (visible if WebGL is supported and user is interacting) */}
-      {hasWebGL && isInteracting && (
-        <canvas
-          ref={canvasRef}
-          className="absolute z-10 block pointer-events-none cursor-pointer"
-        />
-      )}
+      {/* WebGL Canvas layer for fluid liquid distortion */}
+      <canvas
+        ref={canvasRef}
+        className="absolute pointer-events-none z-10"
+        style={{ display: isInteracting && hasWebGL ? 'block' : 'none' }}
+      />
 
-      {/* 2. Static typography fallback for SEO, indexing, and non-WebGL states */}
+      {/* Clean, crisp static typography fallback / base layer */}
       <span
         ref={spanRef}
         className="font-display font-black uppercase block w-full text-center select-none"
@@ -727,8 +726,8 @@ export default function FluidTextEffect({
           letterSpacing: "-0.04em",
           color: textColor,
           paddingTop: `${paddingTop}px`,
-          opacity: (hasWebGL && isInteracting) ? 0 : 1, // hidden but indexing-friendly if WebGL is loaded
-          transition: "opacity 0.15s ease",
+          opacity: isInteracting && hasWebGL ? 0 : 1,
+          transition: "opacity 0.2s ease",
         }}
       >
         {text}

@@ -409,7 +409,23 @@ const LETTER_TOP_PADDING = 80; // ← ĐỔI SỐ NÀY (px)
 //     GIẢM SỐ → chữ chạy NHANH HƠN (ví dụ: 400, 500)
 //     TĂNG SỐ → chữ chạy CHẬM HƠN (ví dụ: 1000, 1200)
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-const HERO_SCROLL_DURATION = 3000; // ← ĐỔI SỐ NÀY để chỉnh tốc độ cuộn chữ (px) 
+const HERO_SCROLL_DURATION = 1000; // ← ĐỔI SỐ NÀY để chỉnh tốc độ cuộn chữ (px) 
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// 🎛️  KHOẢNG CÁCH GIỮA CHỮ "RELIFE" VÀ PHẦN NỘI DUNG TIẾP THEO
+//     Đơn vị px: 80px ≈ 2cm - 3cm trên màn hình chuẩn
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+const SECTION_GAP = 80; // ← ĐỔI SỐ NÀY (px) để tăng/giảm khoảng cách (2cm - 3cm = 80px)
+
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// 🎛️  CẤU HÌNH BANNER ẢNH GIF TOP ABOUT US (KÍCH THƯỚC, VỊ TRÍ, TỐC ĐỘ)
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+export const GIF_BANNER_CONFIG = {
+  speedMs: 750,    // ← Tốc độ chạy ảnh (ms) — Số càng lớn ảnh chạy càng CHẬM (mặc định: 750ms / ảnh)
+  offsetY: 0,      // ← Dịch chuyển LÊN / XUỐNG (px) — Số âm (-) dịch LÊN, số dương (+) dịch XUỐNG
+  scale: 1.0,      // ← Phóng to / thu nhỏ tỉ lệ khung GIF (1.0 = 100%, 1.2 = 120%, 0.8 = 80%)
+};
 
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 // 🎛️  KÍCH THƯỚC KHUNG DƯỚI PHẦN RELIFE (GIF BANNER HEIGHT)
@@ -431,7 +447,7 @@ const RESPONSIVE_LETTER_SCALE = 11;   // ← Tỷ lệ co giãn theo màn hình 
 
 
 interface AboutHeroProps {
-  scrollProgress: number;
+  scrollProgress?: number;
   layoutSizes: {
     slideDistance: number;
     letterHeight: number;
@@ -443,10 +459,10 @@ interface AboutHeroProps {
   gifRef: React.RefObject<HTMLDivElement | null>;
   metaRef: React.RefObject<HTMLDivElement | null>;
   letterRef: React.RefObject<HTMLDivElement | null>;
+  letterBlockRefs: React.MutableRefObject<(HTMLDivElement | null)[]>;
 }
 
 const AboutHeroSection: React.FC<AboutHeroProps> = ({
-  scrollProgress = 0,
   layoutSizes = {
     slideDistance: 450,
     letterHeight: 180,
@@ -458,6 +474,7 @@ const AboutHeroSection: React.FC<AboutHeroProps> = ({
   gifRef,
   metaRef,
   letterRef,
+  letterBlockRefs,
 }) => {
   const [currentFrame, setCurrentFrame] = useState(0);
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
@@ -466,7 +483,7 @@ const AboutHeroSection: React.FC<AboutHeroProps> = ({
   useEffect(() => {
     const interval = setInterval(() => {
       setCurrentFrame((prev) => (prev + 1) % GIF_IMAGES.length);
-    }, 250);
+    }, GIF_BANNER_CONFIG.speedMs);
     return () => clearInterval(interval);
   }, []);
 
@@ -477,7 +494,7 @@ const AboutHeroSection: React.FC<AboutHeroProps> = ({
     <div
       ref={containerRef}
       className="w-full relative bg-white select-none z-20"
-      style={{ height: `${slideDistance + letterHeight + maxScroll}px` }} // Dynamic height ensures next content section follows seamlessly without gaps
+      style={{ height: `${slideDistance + letterHeight + maxScroll + 80}px` }} // Dynamic height ensures sticky animation completes smoothly without early unsticking
     >
       {/* Sticky layout container pinned below fixed navbar (top: 80px) */}
       <div
@@ -488,7 +505,11 @@ const AboutHeroSection: React.FC<AboutHeroProps> = ({
         <div
           ref={gifRef}
           className="w-full rounded-sm overflow-hidden border border-[#0020D7]/10 relative z-10 shadow-sm bg-gray-50 flex-shrink-0"
-          style={{ height: `${gifHeight}px` }}
+          style={{
+            height: `${gifHeight}px`,
+            transform: `translateY(${GIF_BANNER_CONFIG.offsetY}px) scale(${GIF_BANNER_CONFIG.scale})`,
+            transformOrigin: "center top",
+          }}
         >
           <img
             src={GIF_IMAGES[currentFrame]}
@@ -516,24 +537,20 @@ const AboutHeroSection: React.FC<AboutHeroProps> = ({
           style={{ height: `${letterHeight}px`, overflow: "visible" }}
         >
           {LETTERS.map((letter, i) => {
-            // Stagger calculation left-to-right (R -> E -> L -> I -> F -> E)
-            const start = (i / totalLetters) * 0.45;
-            const end = start + 0.45;
-            const rawT = Math.max(0, Math.min(1, (scrollProgress - start) / (end - start)));
-            // Cubic easeOut for elegant mechanical slide feel
-            const t = 1 - Math.pow(1 - rawT, 3);
-
-            // Translate starting from 0px (aligned on load) up to -slideDistance (covering GIF at top)
-            const translateY = -t * slideDistance;
-
             return (
               <div
                 key={`block-${i}`}
+                ref={(el) => {
+                  if (letterBlockRefs.current) {
+                    letterBlockRefs.current[i] = el;
+                  }
+                }}
                 className="flex-1 flex flex-col justify-start bg-white relative"
                 style={{
                   height: `${slideDistance + letterHeight}px`,
-                  transform: `translateY(${translateY}px)`,
+                  transform: "translate3d(0, 0px, 0)",
                   willChange: "transform",
+                  marginRight: i === totalLetters - 1 ? 0 : "-2px",
                   zIndex: hoveredIndex === i ? 50 : 1,
                 }}
                 onMouseEnter={() => setHoveredIndex(i)}
@@ -564,7 +581,6 @@ const AboutHeroSection: React.FC<AboutHeroProps> = ({
 
 
 export default function AboutUs() {
-  const [scrollProgress, setScrollProgress] = useState(0);
   const [layoutSizes, setLayoutSizes] = useState({
     slideDistance: 450,
     letterHeight: 180,
@@ -576,6 +592,11 @@ export default function AboutUs() {
   const gifRef = useRef<HTMLDivElement>(null);
   const metaRef = useRef<HTMLDivElement>(null);
   const letterRef = useRef<HTMLDivElement>(null);
+  const letterBlockRefs = useRef<(HTMLDivElement | null)[]>([]);
+  const contentWrapperRef = useRef<HTMLDivElement>(null);
+
+  const layoutSizesRef = useRef(layoutSizes);
+  layoutSizesRef.current = layoutSizes;
 
   const maxScroll = HERO_SCROLL_DURATION; // Scroll range to complete letter slide-up cover
 
@@ -613,39 +634,75 @@ export default function AboutUs() {
     };
   }, []);
 
-  // Track window scroll progress relative to the hero section
+  // Butter-smooth scroll tracking with requestAnimationFrame and direct GPU translate3d updates
   useEffect(() => {
-    const handleScroll = () => {
+    let animFrameId: number | null = null;
+
+    const updateTransforms = () => {
+      animFrameId = null;
       if (!containerRef.current) return;
+
       const rect = containerRef.current.getBoundingClientRect();
       const scrollTop = -rect.top;
-      // Phase 1: RELIFE letter slide-up (0 → maxScroll)
       const progress = Math.max(0, Math.min(1, scrollTop / maxScroll));
-      setScrollProgress(progress);
+
+      const totalLetters = LETTERS.length;
+      const slideDist = layoutSizesRef.current.slideDistance;
+
+      // 1. Direct GPU transform update for letter blocks
+      letterBlockRefs.current.forEach((el, i) => {
+        if (!el) return;
+        const start = (i / totalLetters) * 0.45;
+        const end = start + 0.45;
+        const rawT = Math.max(0, Math.min(1, (progress - start) / (end - start)));
+        const t = 1 - Math.pow(1 - rawT, 3);
+        const translateY = -t * slideDist;
+        el.style.transform = `translate3d(0, ${translateY.toFixed(2)}px, 0)`;
+      });
+
+      // 2. Direct GPU transform update for content wrapper
+      if (contentWrapperRef.current) {
+        const clampedProgress = Math.min(1, Math.max(0, progress));
+        const contentTranslateY = SECTION_GAP - slideDist + (1 - clampedProgress) * (slideDist - maxScroll);
+        contentWrapperRef.current.style.transform = `translate3d(0, ${contentTranslateY.toFixed(2)}px, 0)`;
+      }
+    };
+
+    const handleScroll = () => {
+      if (animFrameId === null) {
+        animFrameId = requestAnimationFrame(updateTransforms);
+      }
     };
 
     window.addEventListener("scroll", handleScroll, { passive: true });
-    handleScroll();
-    return () => window.removeEventListener("scroll", handleScroll);
+    updateTransforms();
+
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+      if (animFrameId !== null) {
+        cancelAnimationFrame(animFrameId);
+      }
+    };
   }, [maxScroll]);
 
   return (
     <div className="w-full bg-white relative flex flex-col">
       {/* 0. NEW About Hero Section */}
       <AboutHeroSection
-        scrollProgress={scrollProgress}
         layoutSizes={layoutSizes}
         maxScroll={maxScroll}
         containerRef={containerRef}
         gifRef={gifRef}
         metaRef={metaRef}
         letterRef={letterRef}
+        letterBlockRefs={letterBlockRefs}
       />
 
       {/* Wrapper for the rest of the content, translated up dynamically during hero slide */}
       <div
+        ref={contentWrapperRef}
         style={{
-          transform: `translateY(${-scrollProgress * layoutSizes.slideDistance}px)`,
+          transform: `translate3d(0, ${SECTION_GAP - layoutSizes.slideDistance}px, 0)`,
           willChange: "transform",
           position: "relative",
           zIndex: 40,

@@ -294,7 +294,7 @@ const MeshPart: React.FC<{
     }
   };
 
-  const meshColor = materialProps.color;
+  const meshColor = materialProps.color || '#FFFFFF';
 
   return (
     <group onPointerMove={handlePointerMove} onPointerOut={() => setBrushPos(null)}>
@@ -312,11 +312,11 @@ const MeshPart: React.FC<{
         }}
       >
         <meshStandardMaterial
-          color={materialProps.color}        // Màu sắc đổ vào 3D
-          roughness={materialProps.roughness}  // Độ nhám của bề mặt nhựa/vật liệu
-          metalness={materialProps.metalness}  // Độ ánh kim
+          color={meshColor}                 // Màu gốc chính xác 100% của vật liệu
+          roughness={materialProps.roughness ?? 0.5}  // Độ nhám tự nhiên
+          metalness={materialProps.metalness ?? 0.0}  // Độ ánh kim
           flatShading={style === 'lowpoly'}
-          envMapIntensity={0.1}
+          envMapIntensity={0.4}
           side={THREE.DoubleSide}
         />
         {showWireframe && (
@@ -538,7 +538,7 @@ export const Viewer3D: React.FC<Viewer3DProps> = ({
           </div>
 
           <div 
-            className="absolute bg-[#F9F9F9] overflow-hidden z-10"
+            className="absolute bg-[#F8F9FA] overflow-hidden z-10"
             style={{
               left: `${5.4 / cfg.viewerFrame.scale}cqmin`,
               right: `${5.4 / cfg.viewerFrame.scale}cqmin`,
@@ -552,7 +552,12 @@ export const Viewer3D: React.FC<Viewer3DProps> = ({
               <Canvas
                 shadows
                 dpr={[1, 2]}
-                gl={{ antialias: true, preserveDrawingBuffer: true }}
+                gl={{ 
+                  antialias: true, 
+                  preserveDrawingBuffer: true,
+                  toneMapping: THREE.ACESFilmicToneMapping,
+                  toneMappingExposure: 1.05
+                }}
                 events={(state) => ({
                   ...events(state),
                   compute: (event, state) => {
@@ -573,11 +578,11 @@ export const Viewer3D: React.FC<Viewer3DProps> = ({
                   strokesVersion={strokesVersion}
                 />
                 <PerspectiveCamera makeDefault position={[0, 0, 125]} fov={45} />
-                {/* Direct lighting – replaces Stage to avoid unintended centering */}
-                <ambientLight intensity={0.6} />
-                <directionalLight position={[80, 120, 80]} intensity={0.6} castShadow shadow-bias={-0.0005} />
-                <directionalLight position={[-60, -60, 80]} intensity={0.2} />
-                <Environment preset="studio" />
+                {/* Ánh sáng Studio trung tính dịu mắt — Giữ nguyên 100% màu gốc, sáng rõ nổi khối */}
+                <ambientLight intensity={0.85} />
+                <directionalLight position={[80, 120, 100]} intensity={0.85} castShadow shadow-bias={-0.0001} />
+                <directionalLight position={[-80, 40, -50]} intensity={0.35} />
+                <Environment preset="studio" environmentIntensity={0.4} />
                 <group
                   ref={groupRef}
                   scale={[globalTransform.scale, globalTransform.scale, globalTransform.scale]}
@@ -614,8 +619,15 @@ export const Viewer3D: React.FC<Viewer3DProps> = ({
               </Canvas>
             </div>
 
-            {/* Pop-Art Action Buttons (Top Left) */}
-            <div className="absolute top-4 left-4 z-20 flex items-center gap-2">
+            {/* Action Buttons & Status Controls (Top Left) */}
+            <div className="absolute top-4 left-4 z-20 flex items-center gap-2.5">
+              <button
+                onClick={handleReset}
+                className="w-8 h-8 flex items-center justify-center bg-white border-2 border-black rounded-lg hover:scale-110 active:scale-90 transition-transform shadow-md cursor-pointer shrink-0"
+                title="Reset Camera"
+              >
+                <RotateCcw size={16} className="text-black" />
+              </button>
               <div
                 style={{
                   transform: `translate(${cfg.stlButton.offsetX}px, ${cfg.stlButton.offsetY}px) scale(${cfg.stlButton.scale})`,
@@ -663,24 +675,6 @@ export const Viewer3D: React.FC<Viewer3DProps> = ({
                 >
                   <img src={assetBoxIcon} className="w-full h-auto pointer-events-none select-none" alt="Wireframe" />
                 </button>
-              </div>
-            </div>
-
-            {/* Control Status and Reset Camera (Top Right) */}
-            <div className="absolute top-4 right-4 z-20 flex items-center gap-2">
-              <button
-                onClick={handleReset}
-                className="w-8 h-8 flex items-center justify-center bg-white border-2 border-black rounded-lg hover:scale-110 active:scale-90 transition-transform shadow-md cursor-pointer"
-                title="Reset Camera"
-              >
-                <RotateCcw size={16} className="text-black" />
-              </button>
-              <div className={cn(
-                "flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[8px] font-black uppercase tracking-widest shadow-md border border-gray-100 bg-white/95 text-black select-none pointer-events-none",
-                smoothBrushActive ? "text-amber-600 border-amber-200" : "text-[#0020D7] border-blue-200"
-              )}>
-                <span className={cn("w-1.5 h-1.5 rounded-full", smoothBrushActive ? "bg-amber-500" : "bg-[#0020D7]")} />
-                <span>{smoothBrushActive ? "Sculpting" : "Painting"}</span>
               </div>
             </div>
 

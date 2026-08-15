@@ -29,7 +29,7 @@ const CARDS: CardData[] = [
     type: 'text',
     content: 'WASTE IS A RESOURCE',
     subtext: 'RE_MOLD // PROTOCOL_01',
-    color: 'bg-acid text-black',
+    color: 'bg-[#D1FF00] text-black',
     initialPos: { x: -350, y: -200, rotate: -8 }
   },
   {
@@ -42,9 +42,9 @@ const CARDS: CardData[] = [
   {
     id: '3',
     type: 'text',
-    content: '100% RECYCLED PET',
+    content: 'RECYCLED PET PLASTIC',
     subtext: 'BOTTLE_REBIRTH_SYS',
-    color: 'bg-black text-white',
+    color: 'bg-[#FF009C] text-white',
     initialPos: { x: 400, y: -150, rotate: -12 }
   },
   {
@@ -59,7 +59,7 @@ const CARDS: CardData[] = [
     type: 'text',
     content: 'CIRCULAR DESIGN',
     subtext: 'NO_WASTE_LEFT_BEHIND',
-    color: 'bg-burnt-orange text-white',
+    color: 'bg-white text-black',
     initialPos: { x: -450, y: 150, rotate: 6 }
   },
   {
@@ -74,7 +74,7 @@ const CARDS: CardData[] = [
     type: 'text',
     content: 'REBUILD THE SYSTEM',
     subtext: 'PLASTIC_PEOPLE_LAB',
-    color: 'bg-warning text-white',
+    color: 'bg-[#A7F417] text-black',
     initialPos: { x: 150, y: 250, rotate: 8 }
   },
   {
@@ -138,7 +138,7 @@ const ScatterCard = ({ card, topZ, setTopZ }: { card: CardData; topZ: number; se
       {/* Yếu tố Băng keo Trang trí */}
       {hasTape && (
         <div 
-          className="absolute w-24 h-8 bg-amber-900/20 backdrop-blur-sm z-50 pointer-events-none border border-white/10"
+          className="absolute w-24 h-7 bg-[#F4EBE1]/40 backdrop-blur-[2px] z-50 pointer-events-none border-y border-white/60 border-x border-white/30 shadow-[0_2px_4px_rgba(0,0,0,0.1)]"
           style={{
             top: tapePos.top,
             bottom: tapePos.bottom,
@@ -171,8 +171,11 @@ const ScatterCard = ({ card, topZ, setTopZ }: { card: CardData; topZ: number; se
         <div className="flex flex-col h-full justify-between gap-12 p-2">
           <div className="flex justify-between items-start">
             <Quote size={24} className="opacity-10" />
-            <div className="bg-black/10 px-2 py-1 rounded-sm">
-              <span className="font-mono text-[9px] font-black tracking-widest uppercase">/RE_MOLD</span>
+            <div className={cn(
+              "px-2 py-1 rounded-sm font-mono text-[9px] font-black tracking-widest uppercase",
+              !card.color?.includes('text-white') ? "bg-[#FF009C]/15 text-[#FF009C]" : "bg-black/20 text-white"
+            )}>
+              /RE_MOLD
             </div>
           </div>
           <h3 className="font-display text-4xl uppercase leading-none tracking-tighter">
@@ -203,7 +206,7 @@ const ScatterGallery: React.FC<ScatterGalleryProps> = ({ cards }) => {
   const displayCards = cards || CARDS;
 
   return (
-    <section className="relative min-h-screen w-full bg-[#f8f8f8] overflow-hidden flex items-center justify-center border-t-4 border-black">
+    <section className="relative min-h-screen w-full bg-[#0020D7] overflow-hidden flex items-center justify-center border-t-4 border-black">
       {/* Hiệu ứng Nhiễu (Noise) */}
       <div className="absolute inset-0 noise-overlay opacity-[0.04] pointer-events-none z-10"></div>
       
@@ -212,10 +215,10 @@ const ScatterGallery: React.FC<ScatterGalleryProps> = ({ cards }) => {
         <motion.h2 
           key={key}
           initial={{ opacity: 0, scale: 0.85, rotate: -2 }}
-          animate={{ opacity: 0.1, scale: 1, rotate: 0 }}
+          animate={{ opacity: 0.15, scale: 1, rotate: 0 }}
           className="font-display text-[28vw] uppercase leading-none text-transparent tracking-tighter select-none whitespace-nowrap"
           style={{ 
-            WebkitTextStroke: '3px #000',
+            WebkitTextStroke: '3px #FFFFFF',
           }}
         >
           RE_mould
@@ -223,12 +226,12 @@ const ScatterGallery: React.FC<ScatterGalleryProps> = ({ cards }) => {
       </div>
 
       {/* Các đường lưới công nghiệp */}
-      <div className="absolute inset-0 pointer-events-none z-0 opacity-10">
+      <div className="absolute inset-0 pointer-events-none z-0 opacity-15">
         {[...Array(6)].map((_, i) => (
-          <div key={`h-${i}`} className="absolute w-full h-[1px] bg-black" style={{ top: `${(i + 1) * 16.6}%` }}></div>
+          <div key={`h-${i}`} className="absolute w-full h-[1px] bg-white" style={{ top: `${(i + 1) * 16.6}%` }}></div>
         ))}
         {[...Array(6)].map((_, i) => (
-          <div key={`v-${i}`} className="absolute h-full w-[1px] bg-black" style={{ left: `${(i + 1) * 16.6}%` }}></div>
+          <div key={`v-${i}`} className="absolute h-full w-[1px] bg-white" style={{ left: `${(i + 1) * 16.6}%` }}></div>
         ))}
       </div>
 
@@ -255,7 +258,7 @@ const ScatterGallery: React.FC<ScatterGalleryProps> = ({ cards }) => {
       <div className="absolute bottom-16 right-16 z-50">
         <button 
           onClick={shuffle}
-          className="group flex items-center gap-6 bg-acid border-2 border-black px-8 py-5 hover:bg-black hover:text-white transition-all shadow-[12px_12px_0px_0px_rgba(0,0,0,1)] hover:shadow-none translate-x-[-6px] translate-y-[-6px] hover:translate-x-0 hover:translate-y-0"
+          className="group flex items-center gap-6 bg-[#FF009C] text-white border-2 border-black px-8 py-5 hover:bg-black hover:text-white transition-all shadow-[12px_12px_0px_0px_rgba(0,0,0,1)] hover:shadow-none translate-x-[-6px] translate-y-[-6px] hover:translate-x-0 hover:translate-y-0"
         >
           <span className="font-display text-2xl uppercase tracking-[0.2em]">Shuffle_Lab</span>
           <RefreshCw size={24} className="group-hover:rotate-180 transition-transform duration-1000" />
@@ -266,12 +269,12 @@ const ScatterGallery: React.FC<ScatterGalleryProps> = ({ cards }) => {
       <div className="absolute bottom-16 left-16 z-50 pointer-events-none">
         <div className="flex flex-col gap-3">
           <div className="flex items-center gap-3">
-            <div className="w-8 h-[2px] bg-black"></div>
-            <div className="font-mono text-[10px] text-black font-bold uppercase tracking-[0.3em]">
+            <div className="w-8 h-[2px] bg-white"></div>
+            <div className="font-mono text-[10px] text-white font-bold uppercase tracking-[0.3em]">
               SYSTEM_GALLERY_V2.5
             </div>
           </div>
-          <div className="font-display text-lg uppercase text-black/60 tracking-tight">
+          <div className="font-display text-lg uppercase text-white/80 tracking-tight">
             Drag to explore the archive
           </div>
         </div>

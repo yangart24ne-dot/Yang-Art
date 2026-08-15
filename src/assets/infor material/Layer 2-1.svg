@@ -15,8 +15,8 @@
 <filter id="filter0_g_144_49" x="-4.30556" y="-1.52588e-05" width="351.786" height="437.103" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
 <feFlood flood-opacity="0" result="BackgroundImageFix"/>
 <feBlend mode="normal" in="SourceGraphic" in2="BackgroundImageFix" result="shape"/>
-<feTurbulence type="fractalNoise" baseFrequency="0.99900001287460327 0.99900001287460327" numOctaves="3" seed="4248" />
-<feDisplacementMap in="shape" scale="88.611114501953125" xChannelSelector="R" yChannelSelector="G" result="displacedImage" width="100%" height="100%" />
+<feTurbulence type="fractalNoise" baseFrequency="0.5" numOctaves="2" seed="4248" />
+<feDisplacementMap in="shape" scale="35" xChannelSelector="R" yChannelSelector="G" result="displacedImage" width="100%" height="100%" />
 <feMerge result="effect1_texture_144_49">
 <feMergeNode in="displacedImage"/>
 </feMerge>

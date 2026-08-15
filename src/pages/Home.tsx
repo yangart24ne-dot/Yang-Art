@@ -87,7 +87,7 @@ const POLAROID_CARDS: CardData[] = [
     type: 'text',
     content: 'WASTE IS A RESOURCE',
     subtext: 'RE_MOLD // PROTOCOL_01',
-    color: 'bg-acid text-black', // Đã sửa lỗi mất màu (sử dụng màu xanh acid mới)
+    color: 'bg-[#D1FF00] text-black', // Xanh lá Acid
     initialPos: { x: -350, y: -200, rotate: -8 }
   },
   {
@@ -100,9 +100,9 @@ const POLAROID_CARDS: CardData[] = [
   {
     id: '3',
     type: 'text',
-    content: '100% RECYCLED PET',
+    content: 'RECYCLED PET PLASTIC',
     subtext: 'BOTTLE_REBIRTH_SYS',
-    color: 'bg-black text-white',
+    color: 'bg-[#FF009C] text-white', // Hồng thương hiệu
     initialPos: { x: 400, y: -150, rotate: -12 }
   },
   {
@@ -117,7 +117,7 @@ const POLAROID_CARDS: CardData[] = [
     type: 'text',
     content: 'CIRCULAR DESIGN',
     subtext: 'NO_WASTE_LEFT_BEHIND',
-    color: 'bg-burnt-orange text-white', // Đã sửa lỗi mất màu (sử dụng màu cam cháy mới)
+    color: 'bg-white text-black', // Trắng
     initialPos: { x: -450, y: 150, rotate: 6 }
   },
   {
@@ -132,7 +132,7 @@ const POLAROID_CARDS: CardData[] = [
     type: 'text',
     content: 'REBUILD THE SYSTEM',
     subtext: 'PLASTIC_PEOPLE_LAB',
-    color: 'bg-warning text-white', // Đã sửa lỗi mất màu (sử dụng màu đỏ cảnh báo mới)
+    color: 'bg-[#A7F417] text-black', // Xanh lá
     initialPos: { x: 150, y: 250, rotate: 8 }
   },
   {
@@ -162,9 +162,9 @@ export default function Home({ onNavigate }: HomeProps) {
   }, [heroScrollProgress]);
 
   const heroLines = useMemo(() => [
-    { text: "RE-LIFE LAB", fontSize: 200, fontFamily: "FSEX300", color: "#0000ff", offsetY: -180 },
-    { text: "the", fontSize: 120, fontFamily: "Playfair Display", color: "#ff009e", offsetY: -2, isItalic: true },
-    { text: "OPEN-SOURCE", fontSize: 220, fontFamily: "FSEX300", color: "#ff009e", offsetY: 200 }
+    { text: "RE-LIFE LAB", fontSize: 200, fontFamily: "Malinton", color: "#0000ff", offsetY: -180 },
+    { text: "the", fontSize: 120, fontFamily: "AnekDevanagari", color: "#ff009e", offsetY: -2, isItalic: true },
+    { text: "OPEN-SOURCE", fontSize: 220, fontFamily: "Malinton", color: "#ff009e", offsetY: 200 }
   ], []);
 
   return (
@@ -225,18 +225,18 @@ export default function Home({ onNavigate }: HomeProps) {
               <div className="flex flex-col md:flex-row justify-between items-end gap-8 flex-1">
                 <div className="flex-1">
                   <div className="flex items-center gap-4 mb-2">
-                    <Recycle className="text-acid" size={32} strokeWidth={2.5} />
+                    <Recycle className="text-[#0020D7]" size={32} strokeWidth={2.5} />
                     <h2 className="font-display text-4xl md:text-6xl tracking-tighter uppercase leading-none">
                       TOTAL_PLASTIC<br />SAVED
                     </h2>
                   </div>
                   <div className="lcd-text text-7xl md:text-9xl text-black font-black tracking-tighter mt-4">
-                    450,231<span className="text-2xl ml-2 text-gray-400">KG</span>
+                    450,231<span className="text-2xl ml-2 text-gray-400 font-sans">KG</span>
                   </div>
                 </div>
 
-                <div className="w-full md:w-64 h-32 bg-gray-50 border border-black/10 p-4 flex flex-col justify-between">
-                  <div className="flex justify-between items-center font-mono text-[8px] text-gray-400">
+                <div className="w-full md:w-64 h-32 bg-[#0020D7]/10 border border-[#0020D7]/20 p-4 flex flex-col justify-between">
+                  <div className="flex justify-between items-center font-mono text-[8px] text-black/60">
                     <span>COLLECTION_POINTS: 142</span>
                     <span>ACTIVE_HUBS: 12</span>
                   </div>
@@ -246,7 +246,7 @@ export default function Home({ onNavigate }: HomeProps) {
                         key={i}
                         initial={{ height: 0 }}
                         animate={{ height: `${h}%` }}
-                        className={cn("flex-1 border-t border-x border-black", i === 6 ? "bg-acid" : "bg-black")}
+                        className={cn("flex-1 border-t border-x border-black", i === 6 ? "bg-[#0020D7]" : "bg-black")}
                       />
                     ))}
                   </div>
@@ -262,7 +262,7 @@ export default function Home({ onNavigate }: HomeProps) {
               <div className="flex flex-col h-full justify-between">
                 <div className="flex items-center gap-4 mb-6">
                   <div className="w-16 h-16 bg-black flex items-center justify-center border-2 border-black">
-                    <Award className="text-acid" size={32} />
+                    <Award className="text-[#FF009C]" size={32} />
                   </div>
                   <div>
                     <h3 className="font-display text-xl leading-none uppercase">HONORABLE<br />BADGE 2024</h3>
@@ -270,7 +270,7 @@ export default function Home({ onNavigate }: HomeProps) {
                   </div>
                 </div>
 
-                <div className="bg-gray-100 p-4 border border-black/10 overflow-hidden">
+                <div className="bg-[#0020D7]/10 p-4 border border-[#0020D7]/20 overflow-hidden">
                   <motion.div
                     animate={{ x: [0, -200] }}
                     transition={{ duration: 10, repeat: Infinity, ease: "linear" }}
@@ -305,7 +305,7 @@ export default function Home({ onNavigate }: HomeProps) {
                   <div key={i} className="flex items-center gap-4 group/step">
                     <div className={cn(
                       "w-10 h-10 flex items-center justify-center brutalist-border",
-                      step.status === 'ACTIVE' ? 'bg-acid' : step.status === 'DONE' ? 'bg-black text-white' : 'bg-white'
+                      step.status === 'ACTIVE' ? 'bg-[#FF009C] text-white' : step.status === 'DONE' ? 'bg-black text-white' : 'bg-white'
                     )}>
                       <step.icon size={18} />
                     </div>
@@ -314,7 +314,7 @@ export default function Home({ onNavigate }: HomeProps) {
                         <span className="font-display text-lg uppercase">{step.id}. {step.label}</span>
                         <span className={cn(
                           "font-mono text-[8px]",
-                          step.status === 'ACTIVE' ? 'text-acid bg-black px-1' : 'text-gray-400'
+                          step.status === 'ACTIVE' ? 'text-[#FF009C] bg-black px-1' : 'text-gray-400'
                         )}>{step.status}</span>
                       </div>
                     </div>
@@ -326,12 +326,12 @@ export default function Home({ onNavigate }: HomeProps) {
             {/* Mô-đun D: Tin Tức & Truyền Thông */}
             <div className="md:col-span-8 grid grid-cols-1 md:grid-cols-2 gap-6">
               <IndustrialContainer title="NEWS_MEDIA_01" onClick={() => onNavigate("communicate")} delay={0.4}>
-                <div className="aspect-video bg-gray-200 mb-4 overflow-hidden brutalist-border relative">
+                <div className="aspect-video bg-[#0020D7]/10 mb-4 overflow-hidden brutalist-border relative">
                   <img
                     src={img1}
                     className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-500"
                   />
-                  <div className="absolute top-2 right-2 bg-warning text-white font-mono text-[8px] px-2 py-1 brutalist-border">
+                  <div className="absolute top-2 right-2 bg-[#FF009C] text-white font-mono text-[8px] px-2 py-1 brutalist-border">
                     NEW_REPORT
                   </div>
                 </div>
@@ -356,22 +356,24 @@ export default function Home({ onNavigate }: HomeProps) {
             </div>
 
             {/* Hành Động Nhanh */}
-            <div className="md:col-span-12 grid grid-cols-2 md:grid-cols-4 gap-6">
-              <button className="bg-black text-white p-8 brutalist-border hover:bg-acid hover:text-black transition-all flex flex-col justify-between text-left group">
-                <Download size={24} className="group-hover:translate-y-1 transition-transform" />
+            <div className="md:col-span-12 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6 items-stretch">
+              <button className="bg-black text-white p-8 brutalist-border hover:bg-[#0020D7] hover:text-white transition-all flex flex-col justify-between text-left group min-h-[140px]">
+                <Download size={24} className="group-hover:translate-y-1 transition-transform text-[#0020D7]" />
                 <span className="font-display text-2xl uppercase leading-none">DOWNLOAD<br />GUIDE.PDF</span>
               </button>
-              <button className="bg-white text-black p-8 brutalist-border hover:bg-black hover:text-white transition-all flex flex-col justify-between text-left group">
-                <ShoppingBag size={24} className="group-hover:scale-110 transition-transform" />
+              <button className="bg-white text-black p-8 brutalist-border hover:bg-[#FF009C] hover:text-white transition-all flex flex-col justify-between text-left group min-h-[140px]">
+                <ShoppingBag size={24} className="group-hover:scale-110 transition-transform text-[#FF009C]" />
                 <span className="font-display text-2xl uppercase leading-none">BUY<br />MATERIALS</span>
               </button>
               <NeubrutalismButton
                 label="JOIN_THE_PARTNERSHIP_NETWORK"
-                className="md:col-span-2 w-full"
+                color="#0020D7"
+                fontColor="#FFFFFF"
+                className="col-span-1 sm:col-span-2 md:col-span-2 w-full h-full"
                 padding="1.5rem 1.5rem"
                 onClick={() => { }}
               >
-                <ArrowRight size={32} className="group-hover:translate-x-2 transition-transform ml-4" />
+                <ArrowRight size={32} className="group-hover:translate-x-2 transition-transform ml-4 flex-shrink-0 text-[#FF009C]" />
               </NeubrutalismButton>
             </div>
 
@@ -382,15 +384,7 @@ export default function Home({ onNavigate }: HomeProps) {
         <ScatterGallery cards={POLAROID_CARDS} />
       </div>
 
-      {/* Trang Trí Mã Vạch */}
-      <div className="fixed bottom-24 right-12 opacity-20 pointer-events-none hidden xl:block">
-        <div className="flex gap-1 h-12">
-          {[2, 4, 1, 8, 2, 6, 2, 1, 4, 2, 8, 1].map((w, i) => (
-            <div key={i} className="bg-black" style={{ width: `${w}px` }}></div>
-          ))}
-        </div>
-        <div className="font-mono text-[8px] text-black mt-1">SYS_AUTH_PP_9912026</div>
-      </div>
+
     </div>
   );
 }

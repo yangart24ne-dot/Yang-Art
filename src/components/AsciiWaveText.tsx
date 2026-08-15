@@ -114,7 +114,7 @@ function AsciiParticles({ density }: { density: number }) {
     ctx.fillStyle = 'black';
     ctx.fillRect(0, 0, canvas.width, canvas.height);
     ctx.fillStyle = 'white';
-    ctx.font = 'bold 40px "FSEX300", sans-serif';
+    ctx.font = 'bold 40px "Malinton", sans-serif';
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
     

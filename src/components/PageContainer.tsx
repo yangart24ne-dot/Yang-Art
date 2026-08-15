@@ -14,7 +14,7 @@ const CONTAINER_SIZES = {
   narrow: "var(--container-max-width-narrow)",
   standard: "var(--container-max-width-standard)",
   wide: "var(--container-max-width-wide)",
-  full: "var(--container-max-width-full)",
+  full: "100%",
 };
 
 interface PageContainerProps extends React.HTMLAttributes<HTMLElement> {

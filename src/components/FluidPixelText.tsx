@@ -33,7 +33,7 @@ interface FluidPixelTextProps {
 const FluidPixelText: React.FC<FluidPixelTextProps> = ({ 
   lines, 
   className,
-  interactRadius = 120
+  interactRadius = 0
 }) => {
   const { activePet, petPosition } = usePet();
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -65,15 +65,20 @@ const FluidPixelText: React.FC<FluidPixelTextProps> = ({
       
       offscreenCtx.clearRect(0, 0, offscreenCanvas.width, offscreenCanvas.height);
       
+      const responsiveScale = Math.min(1, Math.max(0.4, canvas.width / 1440));
+
       lines.forEach((line) => {
         offscreenCtx.fillStyle = line.color;
         const fontStyle = line.isItalic ? 'italic' : 'normal';
-        const fontWeight = (line.fontFamily.includes('Archivo') || line.fontFamily.includes('FSEX300')) ? '900' : '400';
-        offscreenCtx.font = `${fontStyle} ${fontWeight} ${line.fontSize}px "${line.fontFamily}", sans-serif`;
+        const fontWeight = (line.fontFamily.includes('Malinton') || line.fontFamily.includes('AnekDevanagari')) ? '900' : '400';
+        const fontSize = Math.round(line.fontSize * responsiveScale);
+        const offsetY = Math.round(line.offsetY * responsiveScale);
+
+        offscreenCtx.font = `${fontStyle} ${fontWeight} ${fontSize}px "${line.fontFamily}", sans-serif`;
         offscreenCtx.textAlign = 'center';
         offscreenCtx.textBaseline = 'middle';
         
-        const yPos = offscreenCanvas.height / 2 + line.offsetY;
+        const yPos = offscreenCanvas.height / 2 + offsetY;
         offscreenCtx.fillText(line.text, offscreenCanvas.width / 2, yPos);
       });
 

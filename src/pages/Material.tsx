@@ -1,8 +1,9 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { motion } from "motion/react";
 import { Plus } from "lucide-react";
-import GalleryCarousel from "../components/GalleryCarousel";
 import PageContainer from "../components/PageContainer";
 import Product3DViewer from "../components/Product3DViewer";
+import Spiral3DSlider from "../components/Spiral3DSlider";
 import chai1Model from "../assets/PLASTIC 3D/chai1.glb?url";
 
 import group39473 from "../assets/infor material/Group 39473.svg";
@@ -34,6 +35,13 @@ import theRebirthDesc from "../assets/infor material/rebirth_desc.svg";
 
 // Background diagram image
 import group39472 from "../assets/infor material/Group 39472.png";
+import customFooterImg from "../assets/infor material/footer.png";
+import lotNenImg from "../assets/infor material/lót nền.png";
+import beFirstSvg from "../assets/infor material/BE THE FIRST TO KNOW.svg";
+import logoNameFooterSvg from "../assets/infor material/logonamefooter.svg";
+import followUsSvg from "../assets/infor material/Group 39477.svg";
+import contactUsSvg from "../assets/infor material/Group 39478.svg";
+import privacyTextSvg from "../assets/infor material/RE-LIFE Lab respects your privacy as much as we respect the planet. No spam, no selling your data - your secrets are safe in our vault. Drop your email to unlock exclusive lab drops, early collection access, and on-chain events..svg";
 
 /**
  * ============================================================================
@@ -48,35 +56,49 @@ import group39472 from "../assets/infor material/Group 39472.png";
  */
 export const MATERIAL_ASSETS_CONFIG = {
   // Layer 2-1.svg — Hình trang trí mờ bên TRÁI
-  // LƯU Ý: File SVG đã có opacity="0.2" bên trong, KHÔNG đặt opacity < 1 ở đây vì sẽ nhân đôi độ mờ!
   layer2Left: {
-    offsetX: -120,      // ← Dịch ngang (px) 
-    offsetY: 1100,     // ← Dịch dọc  (px)   
-    scale: 1.52,      // ← Phóng to / thu nhỏ
-    opacity: 1.45,    // ← Để 1.0 — SVG đã tự mờ sẵn rồi (opacity="0.2" trong file)
+    offsetX: 0,         // ← Dịch ngang (px): số âm (-) sang trái, số dương (+) sang phải
+    offsetY: 0,         // ← DỊCH VỊ TRÍ LÊN / XUỐNG (px): Số âm (-) lên trên, số dương (+) xuống dưới
+    scale: 1.5,         // ← Phóng to / thu nhỏ
+    opacity: 0.8,       // ← Độ trong suốt 
   },
 
   // Layer 2.svg — Hình trang trí mờ bên PHẢI
-  // LƯU Ý: File SVG đã có opacity="0.2" bên trong, KHÔNG đặt opacity < 1 ở đây vì sẽ nhân đôi độ mờ!
   layer2Right: {
-    offsetX: 100,      // ← Dịch ngang (px)   
-    offsetY: 1110,      // ← Dịch dọc  (px)  
-    scale: 1.45,      // ← Phóng to / thu nhỏ
-    opacity: 1.0,    // ← Để 1.0 — SVG đã tự mờ sẵn rồi (opacity="0.2" trong file)
+    offsetX: 0,         // ← Dịch ngang (px): số âm (-) sang trái, số dương (+) sang phải
+    offsetY: 0,         // ← DỊCH VỊ TRÍ LÊN / XUỐNG (px): Số âm (-) lên trên, số dương (+) xuống dưới
+    scale: 1.5,         // ← Phóng to / thu nhỏ
+    opacity: 0.8,       // ← Độ trong suốt
+  },
+
+  // 🏃 BĂNG RÔN CHỮ VÀ LOGO CHẠY (RUNNING TAPE TICKER OVERLAY)
+  runningTape: {
+    offsetY: 0,        // ← Dịch dọc LÊN / XUỐNG (px): 0 = trùng tuyệt đối với vị trí gốc
+    rotation: 0,       // ← Độ nghiêng uốn lượn
+    speed: 18,         // ← Tốc độ chạy (giây): số nhỏ hơn chạy nhanh hơn
+    scale: 1.0,        // ← Phóng to / thu nhỏ
+    opacity: 1.0,      // ← Độ trong suốt
+  },
+
+  // 🌟 CỤM TYPOGRAPHY CHÍNH (Dịch chuyển / phóng to THỜI ĐIỂM TỔNG CẢ CỤM CHỮ VÀ KHUNG XANH)
+  heroTypographyGroup: {
+    offsetX: 0,        // ← Dịch ngang CẢ CỤM (px): số âm (-) sang trái, số dương (+) sang phải
+    offsetY: 0,        // ← Dịch dọc LÊN / XUỐNG CẢ CỤM (px): số âm (-) dịch LÊN TRÊN, số dương (+) dịch XUỐNG DƯỚI
+    scale: 1.0,        // ← Phóng to / thu nhỏ TỔNG THỂ CẢ CỤM (1.0 = 100%, 1.2 = 120%, 0.8 = 80%)
   },
 
   // Group 39473.svg — Khung viền xanh lá (Green Box Highlight)
   greenBox: {
-    offsetX: 0,      // ← Dịch ngang (px)
-    offsetY: 1015,    // ← Dịch dọc  (px) 
-    scale: 1.2,      // ← Phóng to / thu nhỏ
+    offsetX: 0,        // ← Dịch ngang chi tiết (px)
+    offsetY: -24,        // ← Dịch dọc chi tiết (px)  
+    scale: 1.2,        // ← Phóng to / thu nhỏ chi tiết 
   },
 
   // We transform sustainable materials into design legacies..svg — Chữ typography chính
   weTransformText: {
-    offsetX: 0,      // ← Dịch ngang (px)
-    offsetY: 1050,    // ← Dịch dọc  (px)
-    scale: 1.1,      // ← Phóng to / thu nhỏ
+    offsetX: 0,        // ← Dịch ngang chi tiết (px)
+    offsetY: 0,        // ← Dịch dọc chi tiết (px)
+    scale: 1.0,        // ← Phóng to / thu nhỏ chi tiết
   },
 
   // ─────────────────────────────────────────────────────────────
@@ -86,35 +108,35 @@ export const MATERIAL_ASSETS_CONFIG = {
   // ── BƯỚC 1: THE HUNT ──
   hunt: {
     circle: { offsetX: 0, offsetY: 0, scale: 1.0 },   // Group 13.svg — Vòng tròn icon
-    title: { offsetX: 0, offsetY: 0, scale: 1.0 },   // THE HUNT.svg — Tiêu đề
-    desc: { offsetX: 0, offsetY: 0, scale: 1.0 },   // hunt_desc.svg — Mô tả
+    title: { offsetX: 0, offsetY: 0, scale: 1.0 },    // THE HUNT.svg — Tiêu đề
+    desc: { offsetX: 0, offsetY: 0, scale: 1.0 },     // hunt_desc.svg — Mô tả
   },
 
   // ── BƯỚC 2: THE SHRED ──
   shred: {
     circle: { offsetX: 0, offsetY: 0, scale: 1.0 },   // Group 14.svg — Vòng tròn icon
-    title: { offsetX: 0, offsetY: 0, scale: 1.0 },   // THE SHRED.svg — Tiêu đề
-    desc: { offsetX: 0, offsetY: 0, scale: 1.0 },   // shred_desc.svg — Mô tả
+    title: { offsetX: 0, offsetY: 0, scale: 1.0 },    // THE SHRED.svg — Tiêu đề
+    desc: { offsetX: 0, offsetY: 0, scale: 1.0 },     // shred_desc.svg — Mô tả
   },
 
   // ── BƯỚC 3: THE COOK ──
   cook: {
     circle: { offsetX: 0, offsetY: 0, scale: 1.0 },   // Group 15.svg — Vòng tròn icon
-    title: { offsetX: 0, offsetY: 0, scale: 1.0 },   // THE COOK.svg — Tiêu đề
-    desc: { offsetX: 0, offsetY: 0, scale: 1.0 },   // cook_desc.svg — Mô tả
+    title: { offsetX: 0, offsetY: 0, scale: 1.0 },    // THE COOK.svg — Tiêu đề
+    desc: { offsetX: 0, offsetY: 0, scale: 1.0 },     // cook_desc.svg — Mô tả
   },
 
   // ── BƯỚC 4: THE REBIRTH ──
   rebirth: {
     circle: { offsetX: 0, offsetY: 0, scale: 1.0 },   // Group 16.svg — Vòng tròn icon
-    title: { offsetX: 0, offsetY: 0, scale: 1.0 },   // THE REBIRTH.svg — Tiêu đề
-    desc: { offsetX: 0, offsetY: 0, scale: 1.0 },   // rebirth_desc.svg — Mô tả
+    title: { offsetX: 0, offsetY: 0, scale: 1.0 },    // THE REBIRTH.svg — Tiêu đề
+    desc: { offsetX: 0, offsetY: 0, scale: 1.0 },     // rebirth_desc.svg — Mô tả
   },
 
   // ── Group 39472.png — Ảnh sơ đồ vòng lặp nền ──
   group39472: {
     offsetX: 0,      // ← Dịch ngang (px)
-    offsetY: 0,      // ← Dịch dọc  (px)
+    offsetY: 0,      // ← Dịch dọc  (px) 
     scale: 1.0,      // ← Phóng to / thu nhỏ
     opacity: 1.0,    // ← Độ trong suốt (0.0 – 1.0)
   },
@@ -126,13 +148,221 @@ export const MATERIAL_ASSETS_CONFIG = {
   // ────────────────────────────────────────────────────────────
   // KHUNG XANH DƯƠNG ĐẶC (Đoạn 2 — FABRICATION PROCESS)
   // ────────────────────────────────────────────────────────────
-  // - offsetY : Dịch lên xuống (px), số âm lên trên (-), số dương xuống dưới (+)
-  //             Dùng margin-top nên KHÔNG đè lên section trước
-  // - scale   : Phóng to / thu nhỏ nội dung bên trong (không cắt nền xanh)
+  // - offsetY       : Dịch chuyển CẢ KHUNG XANH LÊN / XUỐNG (px)
+  //                   👉 Số âm (-) kéo khung xanh LÊN TRÊN (áp sát phần chữ trên)
+  //                   👉 Số dương (+) đẩy khung xanh XUỐNG DƯỚI
+  // - paddingTop    : Khoảng cách từ mép trên khung xanh đến chữ FABRICATION PROCESS (px)
+  // - paddingBottom : Khoảng cách từ các vòng tròn đến mép dưới đáy khung xanh (px)
+  // - scale         : Co giãn / phóng to khung xanh
   processSection: {
-    offsetY: 680,      // ← Dịch lên xuống (px)
-    scale: 1.0,      // ← Phóng to / thu nhỏ nội dung 
+    offsetY: 300,          // ← DỊCH VỊ TRÍ KHUNG XANH LÊN / XUỐNG (px): ví dụ -50, -100, 0, 50
+    paddingTop: 100,      // ← Độ dày khoảng đệm phía TRÊN mép khung xanh (px)
+    paddingBottom: 80,   // ← Độ dày khoảng đệm phía DƯỚI đáy khung xanh (px)
+    scale: 1.0,          // ← Phóng to / thu nhỏ khung xanh (1.0 = 100%)
   },
+
+  // ────────────────────────────────────────────────────────────
+  // SPIRAL 3D SLIDER SECTION (VORTEX 3D MATERIAL GALLERY)
+  // ────────────────────────────────────────────────────────────
+  spiralSection: {
+    offsetX: 0,        // ← Dịch ngang (px)
+    offsetY: 0,        // ← Dịch dọc LÊN / XUỐNG (px): số âm (-) LÊN TRÊN, số dương (+) XUỐNG DƯỚI
+    scale: 1.0,        // ← Phóng to / thu nhỏ
+  },
+
+  // ────────────────────────────────────────────────────────────
+  // 3D MODEL VISUALIZER SECTION ([ 3D_PRODUCT_VISUALIZER ] & RECYCLED_BOTTLE)
+  // ────────────────────────────────────────────────────────────
+  visualizerSection: {
+    offsetX: 0,        // ← Dịch ngang (px)
+    offsetY: 0,        // ← Dịch dọc LÊN / XUỐNG (px): số âm (-) LÊN TRÊN, số dương (+) XUỐNG DƯỚI
+    scale: 1.0,        // ← Phóng to / thu nhỏ
+  },
+
+  footer: {
+    lotNen: {
+      offsetX: 0,        // ← Dịch ngang lót nền (px)
+      offsetY: 0,        // ← Dịch DỌC LÊN / XUỐNG lót nền (px) — số âm (-) lên, số dương (+) xuống
+      scale: 1.0,        // ← Tỉ lệ phóng to/thu nhỏ lót nền
+    },
+    background: {
+      offsetX: 0,        // ← Dịch ngang footer.png (px)
+      offsetY: 0,        // ← Dịch dọc footer.png (px)
+      scale: 1.0,        // ← Tỉ lệ phóng to/thu nhỏ footer.png
+    },
+    beFirst: {
+      left: 34.27,       // ← Vị trí phần trăm từ lề trái (%)
+      top: 64.9,         // ← Vị trí phần trăm từ lề trên (%)
+      scale: 1.0,        // ← Tỷ lệ co giãn
+      width: 31.45,      // ← Chiều rộng phần trăm (%)
+    },
+    emailForm: {
+      left: 28.68,
+      top: 68.6,
+      scale: 1.0,
+      width: 42.64,
+    },
+    privacy: {
+      left: 29.86,
+      top: 74.93,
+      scale: 1.0,
+      width: 40.27,
+    },
+    logo: {
+      left: 8.54,
+      top: 84.85,
+      scale: 1.0,
+      width: 29.3,
+    },
+    followUs: {
+      left: 64.3,
+      top: 89.97,
+      scale: 1.0,
+      width: 6.6,
+    },
+    contactUs: {
+      left: 74.5,
+      top: 89.97,
+      scale: 1.0,
+      width: 17.36,
+    },
+  },
+};
+
+const EmailSubscribeForm = () => {
+  const [email, setEmail] = useState("");
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    alert(`Thank you for subscribing! Registered: ${email}`);
+    setEmail("");
+  };
+
+  return (
+    <form
+      onSubmit={handleSubmit}
+      className="w-full h-full flex items-center bg-white rounded-[41px] relative select-none border border-neutral-200/20 overflow-hidden"
+    >
+      <input
+        type="email"
+        value={email}
+        onChange={(e) => setEmail(e.target.value)}
+        placeholder="EMAIL ADDRESS"
+        className="w-[67.5%] h-full pl-6 pr-2 bg-transparent text-black font-mono text-[8px] sm:text-[10px] md:text-[12px] outline-none border-none placeholder-neutral-400 font-bold rounded-l-[41px]"
+        style={{
+          WebkitBoxShadow: "0 0 0 100px white inset",
+        }}
+        required
+      />
+      <button
+        type="submit"
+        className="w-[32.5%] h-full bg-[#FF0087] text-white font-mono font-black text-[8px] sm:text-[10px] md:text-[12px] tracking-widest uppercase cursor-pointer hover:bg-[#d6006e] transition-colors flex items-center justify-center rounded-[30px_41px_41px_30px]"
+      >
+        JOIN NOW !!!
+      </button>
+    </form>
+  );
+};
+
+const TypewriterSustainableText = () => {
+  const [typedCount, setTypedCount] = useState(0); // 0 to 21 characters ("sustainable materials")
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [isPaused, setIsPaused] = useState(false);
+
+  const TOTAL_CHARS = 21;
+
+  useEffect(() => {
+    let timeout: NodeJS.Timeout;
+
+    if (isPaused) {
+      // Pause 2.5s when fully typed, 0.6s when empty
+      timeout = setTimeout(() => {
+        setIsPaused(false);
+        if (typedCount === TOTAL_CHARS) {
+          setIsDeleting(true);
+        } else if (typedCount === 0) {
+          setIsDeleting(false);
+        }
+      }, typedCount === TOTAL_CHARS ? 2500 : 600);
+      return () => clearTimeout(timeout);
+    }
+
+    if (!isDeleting) {
+      // Typing mode — realistic keyboard keypress (~90-140ms per letter)
+      if (typedCount < TOTAL_CHARS) {
+        const delay = 90 + Math.random() * 50;
+        timeout = setTimeout(() => {
+          setTypedCount((prev) => prev + 1);
+        }, delay);
+      } else {
+        setIsPaused(true);
+      }
+    } else {
+      // Deleting mode — fast backspacing (~40ms per letter)
+      if (typedCount > 0) {
+        timeout = setTimeout(() => {
+          setTypedCount((prev) => prev - 1);
+        }, 40);
+      } else {
+        setIsPaused(true);
+      }
+    }
+
+    return () => clearTimeout(timeout);
+  }, [typedCount, isDeleting, isPaused]);
+
+  // Exact horizontal bounds of "sustainable materials" in the SVG (2.3% to 99.9%)
+  const startPct = 2.3;
+  const totalSpan = 97.6;
+  const currentPct = startPct + (typedCount / TOTAL_CHARS) * totalSpan;
+
+  return (
+    <div className="absolute inset-0 pointer-events-none">
+      {/* Layer 1: Static rows 1, 3, 4 (Mask out row 2) */}
+      <img
+        src={weTransformText}
+        alt="We transform sustainable materials into design legacies"
+        className="absolute inset-0 w-full h-full object-contain pointer-events-none"
+        style={{
+          clipPath: "polygon(0% 0%, 100% 0%, 100% 25%, 0% 25%, 0% 45%, 100% 45%, 100% 100%, 0% 100%)",
+        }}
+      />
+
+      {/* Layer 2: Revealed text layer clipped character-by-character for row 2 */}
+      <div
+        className="absolute inset-0"
+        style={{
+          clipPath: `inset(0 ${Math.max(0, 100 - currentPct).toFixed(2)}% 0 0)`,
+        }}
+      >
+        <img
+          src={weTransformText}
+          alt=""
+          className="absolute inset-0 w-full h-full object-contain pointer-events-none"
+          style={{
+            clipPath: "polygon(0% 25%, 100% 25%, 100% 45%, 0% 45%)",
+          }}
+        />
+      </div>
+
+      {/* Typewriter Cursor Bar | */}
+      <div
+        className="absolute top-[26.5%] h-[18.5%] w-[3.5px] bg-[#FF0087] rounded-full shadow-[0_0_10px_#FF0087] transition-all duration-75"
+        style={{
+          left: `${currentPct.toFixed(2)}%`,
+        }}
+      >
+        {/* Blinking cursor effect when paused */}
+        {isPaused && (
+          <motion.div
+            className="w-full h-full bg-[#FF0087] rounded-full shadow-[0_0_12px_#FF0087]"
+            animate={{ opacity: [1, 0, 1] }}
+            transition={{ duration: 0.6, repeat: Infinity, ease: "easeInOut" }}
+          />
+        )}
+      </div>
+    </div>
+  );
 };
 
 export default function Material() {
@@ -140,13 +370,13 @@ export default function Material() {
   const [rotationSpeed, setRotationSpeed] = useState(60); // Tốc độ xoay tự động (deg/s)
 
   return (
-    <div className="pb-12 min-h-screen bg-[#FFFFFF] overflow-hidden">
+    <div className="min-h-screen bg-[#FFFFFF] overflow-hidden">
 
       {/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
           1. HERO SECTION (Sky/Sand Banner & White Typography Area)
           ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */}
       <div className="w-full relative bg-[#FFFFFF] flex flex-col items-center">
-        {/* Sub-section A: Full-width Sky/Sand graphic collage — chỉ ảnh nền */}
+        {/* Sub-section A: Full-width Sky/Sand graphic collage — ảnh nền */}
         <div className="w-full relative overflow-hidden">
           <img
             src={maskGroup}
@@ -155,84 +385,123 @@ export default function Material() {
           />
         </div>
 
-        {/* ══════════════════════════════════════════════════════
-            CÁC ASSET OVERLAY — nằm TRÊN CÙNG (zIndex: 9999)
-            Thoát khỏi overflow-hidden, không bao giờ bị cắt hay đè
-            ══════════════════════════════════════════════════════ */}
+        {/* Sub-section B: Hero Typography Area on Clean White Background */}
+        <div className="w-full relative bg-[#FFFFFF] py-20 md:py-28 flex items-center justify-center overflow-hidden">
+          {/* Layer 2-1.svg — bên TRÁI — chỉnh trong MATERIAL_ASSETS_CONFIG.layer2Left */}
+          <div
+            className="absolute left-[-2%] md:left-[6%] top-1/2 pointer-events-none select-none"
+            style={{
+              opacity: MATERIAL_ASSETS_CONFIG.layer2Left.opacity,
+              transform: `translate(${MATERIAL_ASSETS_CONFIG.layer2Left.offsetX}px, calc(-50% + ${MATERIAL_ASSETS_CONFIG.layer2Left.offsetY}px)) scale(${MATERIAL_ASSETS_CONFIG.layer2Left.scale})`,
+              zIndex: 10,
+            }}
+          >
+            <motion.img
+              src={layer2_1}
+              alt=""
+              animate={{
+                y: [0, -16, 0],
+              }}
+              transition={{
+                duration: 4,
+                repeat: Infinity,
+                ease: "easeInOut",
+              }}
+              style={{
+                width: `${220 * MATERIAL_ASSETS_CONFIG.layer2Left.scale}px`,
+                willChange: "transform",
+                transform: "translate3d(0, 0, 0)",
+              }}
+            />
+          </div>
 
-        {/* Layer 2-1.svg — bên TRÁI — chỉnh trong MATERIAL_ASSETS_CONFIG.layer2Left */}
-        <img
-          src={layer2_1}
-          alt=""
-          className="absolute left-[-2%] md:left-[8%] top-1/2 pointer-events-none select-none"
-          style={{
-            opacity: MATERIAL_ASSETS_CONFIG.layer2Left.opacity,
-            transform: `translate(${MATERIAL_ASSETS_CONFIG.layer2Left.offsetX}px, calc(-50% + ${MATERIAL_ASSETS_CONFIG.layer2Left.offsetY}px)) scale(${MATERIAL_ASSETS_CONFIG.layer2Left.scale})`,
-            width: `${220 * MATERIAL_ASSETS_CONFIG.layer2Left.scale}px`,
-            zIndex: 9999,
-          }}
-        />
+          {/* Layer 2.svg — bên PHẢI — chỉnh trong MATERIAL_ASSETS_CONFIG.layer2Right */}
+          <div
+            className="absolute right-[-2%] md:right-[6%] top-1/2 pointer-events-none select-none"
+            style={{
+              opacity: MATERIAL_ASSETS_CONFIG.layer2Right.opacity,
+              transform: `translate(${MATERIAL_ASSETS_CONFIG.layer2Right.offsetX}px, calc(-50% + ${MATERIAL_ASSETS_CONFIG.layer2Right.offsetY}px)) scale(${MATERIAL_ASSETS_CONFIG.layer2Right.scale})`,
+              zIndex: 10,
+            }}
+          >
+            <motion.img
+              src={layer2}
+              alt=""
+              animate={{
+                y: [0, 16, 0],
+              }}
+              transition={{
+                duration: 4.5,
+                repeat: Infinity,
+                ease: "easeInOut",
+              }}
+              style={{
+                width: `${220 * MATERIAL_ASSETS_CONFIG.layer2Right.scale}px`,
+                willChange: "transform",
+                transform: "translate3d(0, 0, 0)",
+              }}
+            />
+          </div>
 
-        {/* Layer 2.svg — bên PHẢI — chỉnh trong MATERIAL_ASSETS_CONFIG.layer2Right */}
-        <img
-          src={layer2}
-          alt=""
-          className="absolute right-[-2%] md:right-[8%] top-1/2 pointer-events-none select-none"
-          style={{
-            opacity: MATERIAL_ASSETS_CONFIG.layer2Right.opacity,
-            transform: `translate(${MATERIAL_ASSETS_CONFIG.layer2Right.offsetX}px, calc(-50% + ${MATERIAL_ASSETS_CONFIG.layer2Right.offsetY}px)) scale(${MATERIAL_ASSETS_CONFIG.layer2Right.scale})`,
-            width: `${220 * MATERIAL_ASSETS_CONFIG.layer2Right.scale}px`,
-            zIndex: 9999,
-          }}
-        />
-
-        {/* Centered Typography layout — Group 39473 + We transform text */}
-        <div
-          className="absolute inset-0 flex items-center justify-center pointer-events-none select-none"
-          style={{ zIndex: 9999 }}
-        >
-          <div className="relative w-full max-w-[688px] mx-auto px-4" style={{ aspectRatio: '688/286' }}>
+          {/* Centered Typography layout — Group 39473 + We transform text */}
+          <div
+            className="relative w-full max-w-[688px] mx-auto px-4 z-20"
+            style={{
+              aspectRatio: '688/286',
+              transform: `translate(${MATERIAL_ASSETS_CONFIG.heroTypographyGroup.offsetX}px, ${MATERIAL_ASSETS_CONFIG.heroTypographyGroup.offsetY}px) scale(${MATERIAL_ASSETS_CONFIG.heroTypographyGroup.scale})`,
+              transformOrigin: 'center center',
+            }}
+          >
             {/* Group 39473.svg — Khung viền xanh — chỉnh trong MATERIAL_ASSETS_CONFIG.greenBox */}
             <img
               src={group39473}
               alt=""
-              className="absolute left-1/2 top-[12.24%] w-[108.72%] h-[54.54%] object-contain"
+              className="absolute left-1/2 top-[12.24%] w-[108.72%] h-[54.54%] object-contain pointer-events-none select-none"
               style={{
                 transform: `translate(calc(-50% + ${MATERIAL_ASSETS_CONFIG.greenBox.offsetX}px), ${MATERIAL_ASSETS_CONFIG.greenBox.offsetY}px) scale(${MATERIAL_ASSETS_CONFIG.greenBox.scale})`,
                 transformOrigin: 'center top',
               }}
             />
-            {/* We transform...svg — Chữ chính — chỉnh trong MATERIAL_ASSETS_CONFIG.weTransformText */}
-            <img
-              src={weTransformText}
-              alt="We transform sustainable materials into design legacies"
-              className="absolute inset-0 w-full h-full object-contain"
+            {/* We transform...svg — Chữ chính với hiệu ứng đánh chữ typewriter ở dòng 'sustainable materials' */}
+            <div
+              className="absolute inset-0 w-full h-full pointer-events-none select-none"
               style={{
                 transform: `translate(${MATERIAL_ASSETS_CONFIG.weTransformText.offsetX}px, ${MATERIAL_ASSETS_CONFIG.weTransformText.offsetY}px) scale(${MATERIAL_ASSETS_CONFIG.weTransformText.scale})`,
                 transformOrigin: 'center center',
               }}
-            />
+            >
+              {/* Layer 1: Chữ tĩnh các dòng 1, 3, 4 (Mask che dòng 2) */}
+              <img
+                src={weTransformText}
+                alt="We transform sustainable materials into design legacies"
+                className="absolute inset-0 w-full h-full object-contain"
+                style={{
+                  clipPath: 'polygon(0% 0%, 100% 0%, 100% 25%, 0% 25%, 0% 45%, 100% 45%, 100% 100%, 0% 100%)',
+                }}
+              />
+
+              {/* Layer 2: Dòng 2 'sustainable materials' với hiệu ứng gõ từng chữ typewriter chân thực */}
+              <TypewriterSustainableText />
+            </div>
           </div>
         </div>
-
-
       </div>
 
       {/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
           2. PROCESS CYCLE SECTION (Solid Blue Background & 4-Step Loop)
           ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */}
       <div
-        className="w-full bg-[#0020D7] relative overflow-visible flex flex-col items-center"
-        style={{ marginTop: `${MATERIAL_ASSETS_CONFIG.processSection.offsetY}px` }}
+        className="w-full relative overflow-visible flex flex-col items-center bg-[#0020D7]"
+        style={{
+          marginTop: `${MATERIAL_ASSETS_CONFIG.processSection.offsetY}px`,
+          paddingTop: `${MATERIAL_ASSETS_CONFIG.processSection.paddingTop}px`,
+          paddingBottom: `${MATERIAL_ASSETS_CONFIG.processSection.paddingBottom}px`,
+          transform: `scale(${MATERIAL_ASSETS_CONFIG.processSection.scale})`,
+          transformOrigin: 'top center',
+        }}
       >
-        {/* Nội dung bên trong — scale được nhưng nền xanh vẫn fill đầy */}
-        <div
-          className="w-full py-20 px-6 md:px-8 flex flex-col items-center"
-          style={{
-            transform: `scale(${MATERIAL_ASSETS_CONFIG.processSection.scale})`,
-            transformOrigin: 'top center',
-          }}
-        >
+        {/* Nội dung bên trong */}
+        <div className="w-full relative z-10 py-20 px-6 md:px-8 flex flex-col items-center">
           {/* Circular Layout Header */}
           <div className="text-center mb-20 relative z-10">
             <div className="flex items-center justify-center gap-2 font-mono text-xs text-[#A7F417] mb-2 uppercase tracking-widest font-bold">
@@ -337,12 +606,53 @@ export default function Material() {
               <img src={theRebirthTitle} alt="THE REBIRTH" className="h-6 object-contain mb-2 mx-auto" />
               <img src={theRebirthDesc} alt="Rebirth description" className="h-8 object-contain mx-auto filter brightness-0 invert" />
             </div>
-          </div> {/* ← Đóng inner scale wrapper (processSection.scale) */}
-        </div> {/* ← Đóng outer blue section (processSection.offsetY) */}
+          </div>
+        </div>
+      </div>
 
-        {/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-          3. 3D MODEL VISUALIZER SECTION (Pushed down from top)
+      {/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+          3. SPIRAL 3D MOTION GALLERY (CINEMATIC MATERIAL VORTEX SLIDER)
           ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */}
+      <div
+        className="w-full relative py-16 sm:py-20 md:py-24 bg-[#000000] text-white flex flex-col items-center border-t-4 border-[#D1FF00] border-b-4 border-[#0020D7] overflow-visible"
+        style={{
+          transform: `translate(${MATERIAL_ASSETS_CONFIG.spiralSection.offsetX}px, ${MATERIAL_ASSETS_CONFIG.spiralSection.offsetY}px) scale(${MATERIAL_ASSETS_CONFIG.spiralSection.scale})`,
+          transformOrigin: 'top center',
+        }}
+      >
+        <PageContainer size="wide" className="bg-transparent px-4 sm:px-6 lg:px-8 overflow-visible">
+          {/* Header */}
+          <div className="flex flex-col md:flex-row items-start md:items-end justify-between gap-6 mb-8 sm:mb-10">
+            <div>
+              <div className="flex items-center gap-2 font-mono text-xs text-[#D1FF00] mb-2 uppercase tracking-widest font-bold">
+                <Plus size={14} className="text-[#D1FF00]" />
+                <span>SPIRAL_3D_MOTION // material_vortex_gallery</span>
+              </div>
+              <h2 className="font-display text-3xl sm:text-5xl lg:text-6xl uppercase tracking-tight font-black text-white leading-none">
+                Spiral 3D Slider
+              </h2>
+            </div>
+
+            <div className="max-w-md text-xs sm:text-sm font-sans text-gray-400 leading-relaxed">
+              Quỹ đạo xoắn ốc 3D điện ảnh hiển thị hành trình vật liệu tuần hoàn. Cuộn chuột hoặc kéo thả để tương tác với các thẻ ảnh uốn cong trong không gian đa chiều.
+            </div>
+          </div>
+
+          {/* Interactive Spiral 3D Slider Canvas Component */}
+          <Spiral3DSlider />
+        </PageContainer>
+      </div>
+
+      {/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+          4. 3D MODEL VISUALIZER SECTION ([ 3D_PRODUCT_VISUALIZER ] & RECYCLED_BOTTLE)
+          ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */}
+      <div
+        className="w-full"
+        style={{
+          transform: `translate(${MATERIAL_ASSETS_CONFIG.visualizerSection.offsetX}px, ${MATERIAL_ASSETS_CONFIG.visualizerSection.offsetY}px) scale(${MATERIAL_ASSETS_CONFIG.visualizerSection.scale})`,
+          transformOrigin: 'top center',
+        }}
+      >
         <PageContainer size="wide" className="bg-transparent px-4 sm:px-6 lg:px-8 py-20">
           <div className="flex flex-col gap-8 mb-16">
             {/* Header */}
@@ -405,13 +715,13 @@ export default function Material() {
                     RECYCLED_BOTTLE
                   </h2>
                   <p className="text-xs text-gray-500 leading-relaxed font-sans mb-6 uppercase">
-                    This interactive 3D model represents a recycled plastic bottle archetype (`chai1.glb`), processed through our circular fabrication modules. Optimized for high-definition 3D rendering.
+                    THIS INTERACTIVE 3D MODEL REPRESENTS A RECYCLED PLASTIC BOTTLE ARCHETYPE (CHAI1.GLB), PROCESSED THROUGH OUR CIRCULAR FABRICATION MODULES. OPTIMIZED FOR HIGH-DEFINITION 3D RENDERING.
                   </p>
 
-                  <div className="flex flex-col gap-4">
+                  <div className="space-y-3">
                     <div className="flex justify-between items-center p-3.5 bg-gray-50 border-2 border-black rounded-2xl">
                       <span className="text-[9px] font-black text-gray-400 uppercase tracking-wider">Base Material</span>
-                      <span className="text-[9px] font-black text-black uppercase font-mono bg-[#A7F417] px-2.5 py-0.5 rounded-full border border-black">rPET / rHDPE</span>
+                      <span className="text-[10px] font-black text-[#0020D7] bg-[#A7F417] px-2.5 py-1 rounded-full border border-black font-mono">rPET / rHDPE</span>
                     </div>
                     <div className="flex justify-between items-center p-3.5 bg-gray-50 border-2 border-black rounded-2xl">
                       <span className="text-[9px] font-black text-gray-400 uppercase tracking-wider">Density Code</span>
@@ -433,14 +743,7 @@ export default function Material() {
             </div>
           </div>
         </PageContainer>
-
-      </div> {/* ← Đóng outer blue section (processSection.offsetY) */}
-
-      {/* 4. GALLERY CAROUSEL */}
-      <div className="relative mb-24 w-full overflow-hidden">
-        <GalleryCarousel />
       </div>
-
     </div>
   );
 }
