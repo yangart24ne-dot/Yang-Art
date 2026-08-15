@@ -11,7 +11,9 @@ import {
   Activity,
   Search,
   ShoppingCart,
-  User
+  User,
+  Menu,
+  X
 } from "lucide-react";
 import { cn } from "@/src/lib/utils";
 import MarqueeTicker from "./MarqueeTicker";
@@ -50,6 +52,12 @@ export default function Navbar({ activePage, onNavigate }: NavbarProps) {
   const isDarkPage = activePage === "home" || activePage === "admin" || activePage === "store" || activePage === "about";
   const isAboutPage = activePage === "about";
   const [logoHovered, setLogoHovered] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
+  const handleMobileNavigate = (page: string) => {
+    onNavigate(page);
+    setMobileMenuOpen(false);
+  };
 
   return (
     <header className="fixed top-0 left-0 w-full z-[10000] flex flex-col">
@@ -68,7 +76,7 @@ export default function Navbar({ activePage, onNavigate }: NavbarProps) {
             {/* Mục Logo */}
             <div
               className="flex items-center gap-3 cursor-pointer justify-start h-full"
-              onClick={() => onNavigate("home")}
+              onClick={() => handleMobileNavigate("home")}
               onMouseEnter={() => setLogoHovered(true)}
               onMouseLeave={() => setLogoHovered(false)}
               style={{
@@ -78,13 +86,13 @@ export default function Navbar({ activePage, onNavigate }: NavbarProps) {
               }}
             >
               <Logo
-                className="h-10 w-auto"
+                className="h-8 sm:h-10 w-auto"
                 fillColor={isAboutPage ? (logoHovered ? "#D1FF00" : "#FF009C") : (logoHovered ? "#FF009C" : "#0020D7")}
                 glowing={logoHovered}
               />
             </div>
 
-            {/* Các Mục Điều Hướng */}
+            {/* Các Mục Điều Hướng Desktop (lg+) */}
             <div className="hidden lg:flex items-center justify-center h-full">
               {NAV_ITEMS.map((item) => (
                 <button
@@ -122,16 +130,15 @@ export default function Navbar({ activePage, onNavigate }: NavbarProps) {
               ))}
             </div>
 
-            {/* Phần Bên Phải: Tìm Kiếm, Giỏ Hàng, Đăng Nhập */}
+            {/* Phần Bên Phải: Tìm Kiếm, Giỏ Hàng, Đăng Nhập, Hamburger (Mobile/Tablet) */}
             <div
-              className="flex items-center justify-end h-full"
+              className="flex items-center justify-end h-full gap-3 sm:gap-5"
               style={{
-                gap: NAV_CONFIG.rightGap,
                 transform: `translateX(${NAV_CONFIG.rightOffsetX}px)`,
                 transition: "transform 300ms ease-out",
               }}
             >
-              {/* Thanh Tìm Kiếm (Hồng & Xanh Lá / Xanh Dương & Hồng) */}
+              {/* Thanh Tìm Kiếm */}
               <div className={cn(
                 "hidden sm:flex items-center px-3 py-1 gap-2 group transition-all",
                 isAboutPage
@@ -159,7 +166,7 @@ export default function Navbar({ activePage, onNavigate }: NavbarProps) {
                 />
               </div>
 
-              {/* Giỏ Hàng (Xanh Lá & Hồng / Xanh Dương & Hồng) */}
+              {/* Giỏ Hàng */}
               <button
                 className={cn(
                   "relative p-2 transition-colors group",
@@ -179,11 +186,11 @@ export default function Navbar({ activePage, onNavigate }: NavbarProps) {
                 </span>
               </button>
 
-              {/* Nút Đăng Nhập */}
+              {/* Nút Đăng Nhập Desktop */}
               <button
                 onClick={() => onNavigate("admin")}
                 className={cn(
-                  "md:flex items-center gap-2 px-4 h-8 font-display text-[10px] transition-all uppercase tracking-widest font-bold",
+                  "hidden md:flex items-center gap-2 px-4 h-8 font-display text-[10px] transition-all uppercase tracking-widest font-bold",
                   isAboutPage
                     ? "bg-[#D1FF00] text-[#FF009C] border border-[#FFFFFF] hover:bg-[#FF009C] hover:text-[#FFFFFF] hover:border-[#D1FF00]"
                     : "bg-[#0020D7] text-[#D1FF00] border border-[#FF009C] hover:bg-[#D1FF00] hover:text-[#0020D7]"
@@ -192,10 +199,75 @@ export default function Navbar({ activePage, onNavigate }: NavbarProps) {
                 <User size={14} />
                 LOGIN_SYS
               </button>
+
+              {/* Nút Toggle Hamburger Menu Mobile/iPad */}
+              <button
+                onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+                className={cn(
+                  "lg:hidden p-2 brutalist-border font-bold flex items-center justify-center transition-colors",
+                  isAboutPage
+                    ? "bg-[#FF009C] text-white border-white"
+                    : "bg-[#0020D7] text-white border-black"
+                )}
+                aria-label="Toggle Mobile Menu"
+              >
+                {mobileMenuOpen ? <X size={20} /> : <Menu size={20} />}
+              </button>
             </div>
           </div>
         </PageContainer>
       </nav>
+
+      {/* Drawer Overlay Menu Cho Mobile & iPad (< lg) */}
+      <AnimatePresence>
+        {mobileMenuOpen && (
+          <motion.div
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: "auto" }}
+            exit={{ opacity: 0, height: 0 }}
+            transition={{ duration: 0.3, ease: "easeInOut" }}
+            className="lg:hidden w-full bg-[#000000] border-b-4 border-[#0020D7] text-white px-6 py-6 overflow-hidden shadow-2xl z-[9999]"
+          >
+            <div className="flex flex-col space-y-4">
+              {/* Thanh Tìm Kiếm Mobile */}
+              <div className="sm:hidden flex items-center px-4 py-2 bg-white/10 border border-white/20 rounded-none mb-2">
+                <Search size={16} className="text-[#D1FF00] mr-2" />
+                <input
+                  type="text"
+                  placeholder="SEARCH_SYS..."
+                  className="bg-transparent border-none outline-none font-mono text-xs w-full text-white placeholder:text-white/50"
+                />
+              </div>
+
+              {/* Danh Sách Điều Hướng Mobile */}
+              {NAV_ITEMS.map((item) => (
+                <button
+                  key={item.id}
+                  onClick={() => handleMobileNavigate(item.id)}
+                  className={cn(
+                    "w-full text-left font-display font-black text-xl sm:text-2xl tracking-widest py-3 px-4 transition-all brutalist-border border-black flex justify-between items-center uppercase",
+                    activePage === item.id
+                      ? "bg-[#D1FF00] text-black border-l-8 border-l-[#FF009C]"
+                      : "bg-[#111111] text-white hover:bg-[#0020D7] hover:text-[#D1FF00]"
+                  )}
+                >
+                  <span>{item.label}</span>
+                  <span className="font-mono text-xs text-[#FF009C] font-normal">/SYS_0{item.id}</span>
+                </button>
+              ))}
+
+              {/* Nút Login Mobile */}
+              <button
+                onClick={() => handleMobileNavigate("admin")}
+                className="w-full mt-4 py-4 bg-[#FF009C] text-white font-display font-bold text-lg uppercase tracking-widest border-2 border-white flex items-center justify-center gap-3 brutalist-border"
+              >
+                <User size={20} />
+                LOGIN_SYS SYSTEM
+              </button>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </header>
   );
 }

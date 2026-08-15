@@ -230,8 +230,8 @@ export default function Home({ onNavigate }: HomeProps) {
                       TOTAL_PLASTIC<br />SAVED
                     </h2>
                   </div>
-                  <div className="lcd-text text-7xl md:text-9xl text-black font-black tracking-tighter mt-4">
-                    450,231<span className="text-2xl ml-2 text-gray-400 font-sans">KG</span>
+                  <div className="lcd-text text-4xl sm:text-7xl md:text-9xl text-black font-black tracking-tighter mt-4">
+                    450,231<span className="text-xl sm:text-2xl ml-2 text-gray-400 font-sans">KG</span>
                   </div>
                 </div>
 

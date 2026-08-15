@@ -304,10 +304,10 @@ export default function Footer() {
       >
         <a
           href="tel:+84931451801"
-          className="inline-block text-white font-black tracking-wide cursor-pointer hover:opacity-80 transition-opacity"
+          className="inline-block text-white font-black tracking-wide cursor-pointer hover:opacity-80 transition-opacity whitespace-nowrap"
           style={{
             fontFamily: "'AnekDevanagari', sans-serif",
-            fontSize: "1.1vw",
+            fontSize: "clamp(10px, 1.1vw, 16px)",
           }}
           title="Call Us"
         >
@@ -329,10 +329,10 @@ export default function Footer() {
       >
         <a
           href="mailto:hello.relifelabvn@gmail.com"
-          className="inline-block text-white font-bold tracking-normal cursor-pointer hover:opacity-80 transition-opacity"
+          className="inline-block text-white font-bold tracking-normal cursor-pointer hover:opacity-80 transition-opacity whitespace-nowrap"
           style={{
             fontFamily: "'AnekDevanagari', sans-serif",
-            fontSize: "0.9vw",
+            fontSize: "clamp(9px, 0.9vw, 14px)",
           }}
           title="Email Us"
         >

@@ -89,7 +89,6 @@ const CARDS: CardData[] = [
 
 const ScatterCard = ({ card, topZ, setTopZ }: { card: CardData; topZ: number; setTopZ: (z: number) => void }) => {
   const [zIndex, setZIndex] = useState(1);
-  const [position] = useState(card.initialPos);
   const [hasTape] = useState(Math.random() > 0.5);
   const [tapePos] = useState({
     top: Math.random() > 0.5 ? -10 : 'auto',
@@ -108,7 +107,7 @@ const ScatterCard = ({ card, topZ, setTopZ }: { card: CardData; topZ: number; se
   return (
     <motion.div
       drag
-      dragConstraints={{ left: -800, right: 800, top: -500, bottom: 500 }}
+      dragConstraints={{ left: -400, right: 400, top: -300, bottom: 300 }}
       onDragStart={handleDragStart}
       initial={{ 
         x: card.initialPos.x, 
@@ -131,14 +130,16 @@ const ScatterCard = ({ card, topZ, setTopZ }: { card: CardData; topZ: number; se
       whileTap={{ scale: 0.98, cursor: 'grabbing' }}
       transition={{ type: 'spring', stiffness: 150, damping: 25 }}
       className={cn(
-        "absolute cursor-grab active:cursor-grabbing brutalist-border p-4 select-none shadow-[10px_10px_0px_0px_rgba(0,0,0,1)]",
-        card.type === 'text' ? cn("w-[340px] min-h-[220px]", card.color) : "w-[400px] bg-white"
+        "absolute cursor-grab active:cursor-grabbing brutalist-border p-3 sm:p-4 select-none shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] sm:shadow-[10px_10px_0px_0px_rgba(0,0,0,1)]",
+        card.type === 'text' 
+          ? cn("w-[260px] sm:w-[300px] md:w-[340px] min-h-[180px] sm:min-h-[220px]", card.color) 
+          : "w-[280px] sm:w-[340px] md:w-[400px] bg-white"
       )}
     >
       {/* Yếu tố Băng keo Trang trí */}
       {hasTape && (
         <div 
-          className="absolute w-24 h-7 bg-[#F4EBE1]/40 backdrop-blur-[2px] z-50 pointer-events-none border-y border-white/60 border-x border-white/30 shadow-[0_2px_4px_rgba(0,0,0,0.1)]"
+          className="absolute w-20 sm:w-24 h-5 sm:h-7 bg-[#F4EBE1]/40 backdrop-blur-[2px] z-50 pointer-events-none border-y border-white/60 border-x border-white/30 shadow-[0_2px_4px_rgba(0,0,0,0.1)]"
           style={{
             top: tapePos.top,
             bottom: tapePos.bottom,
@@ -150,7 +151,7 @@ const ScatterCard = ({ card, topZ, setTopZ }: { card: CardData; topZ: number; se
       )}
 
       {card.type === 'image' ? (
-        <div className="space-y-4">
+        <div className="space-y-3 sm:space-y-4">
           <div className="aspect-[4/5] bg-gray-100 overflow-hidden brutalist-border border-black">
             <img 
               src={card.image} 
@@ -160,7 +161,7 @@ const ScatterCard = ({ card, topZ, setTopZ }: { card: CardData; topZ: number; se
             />
           </div>
           <div className="flex justify-between items-center px-1">
-            <span className="font-mono text-[10px] font-black tracking-[0.2em] uppercase">{card.content}</span>
+            <span className="font-mono text-[9px] sm:text-[10px] font-black tracking-[0.15em] sm:tracking-[0.2em] uppercase">{card.content}</span>
             <div className="flex items-center gap-2">
               <span className="font-mono text-[8px] opacity-30">SCAN_0{card.id}</span>
               <Camera size={14} className="text-gray-400" />
@@ -168,21 +169,21 @@ const ScatterCard = ({ card, topZ, setTopZ }: { card: CardData; topZ: number; se
           </div>
         </div>
       ) : (
-        <div className="flex flex-col h-full justify-between gap-12 p-2">
+        <div className="flex flex-col h-full justify-between gap-6 sm:gap-12 p-1 sm:p-2">
           <div className="flex justify-between items-start">
-            <Quote size={24} className="opacity-10" />
+            <Quote size={20} className="opacity-10" />
             <div className={cn(
-              "px-2 py-1 rounded-sm font-mono text-[9px] font-black tracking-widest uppercase",
+              "px-2 py-1 rounded-sm font-mono text-[8px] sm:text-[9px] font-black tracking-widest uppercase",
               !card.color?.includes('text-white') ? "bg-[#FF009C]/15 text-[#FF009C]" : "bg-black/20 text-white"
             )}>
               /RE_MOLD
             </div>
           </div>
-          <h3 className="font-display text-4xl uppercase leading-none tracking-tighter">
+          <h3 className="font-display text-2xl sm:text-4xl uppercase leading-none tracking-tighter">
             {card.content}
           </h3>
-          <div className="pt-4 border-t border-black/20 flex justify-between items-center">
-            <span className="font-mono text-[9px] font-black tracking-widest uppercase opacity-60">{card.subtext}</span>
+          <div className="pt-2 sm:pt-4 border-t border-black/20 flex justify-between items-center">
+            <span className="font-mono text-[8px] sm:text-[9px] font-black tracking-widest uppercase opacity-60">{card.subtext}</span>
             <Plus size={14} />
           </div>
         </div>
@@ -198,6 +199,23 @@ interface ScatterGalleryProps {
 const ScatterGallery: React.FC<ScatterGalleryProps> = ({ cards }) => {
   const [topZ, setTopZ] = useState(10);
   const [key, setKey] = useState(0);
+  const [screenScale, setScreenScale] = useState(1);
+
+  useEffect(() => {
+    const updateScale = () => {
+      const w = window.innerWidth;
+      if (w < 640) {
+        setScreenScale(0.35);
+      } else if (w < 1024) {
+        setScreenScale(0.65);
+      } else {
+        setScreenScale(1);
+      }
+    };
+    updateScale();
+    window.addEventListener('resize', updateScale);
+    return () => window.removeEventListener('resize', updateScale);
+  }, []);
 
   const shuffle = () => {
     setKey(prev => prev + 1);
@@ -206,7 +224,7 @@ const ScatterGallery: React.FC<ScatterGalleryProps> = ({ cards }) => {
   const displayCards = cards || CARDS;
 
   return (
-    <section className="relative min-h-screen w-full bg-[#0020D7] overflow-hidden flex items-center justify-center border-t-4 border-black">
+    <section className="relative min-h-[85vh] sm:min-h-screen w-full bg-[#0020D7] overflow-hidden flex items-center justify-center border-t-4 border-black">
       {/* Hiệu ứng Nhiễu (Noise) */}
       <div className="absolute inset-0 noise-overlay opacity-[0.04] pointer-events-none z-10"></div>
       
@@ -218,7 +236,7 @@ const ScatterGallery: React.FC<ScatterGalleryProps> = ({ cards }) => {
           animate={{ opacity: 0.15, scale: 1, rotate: 0 }}
           className="font-display text-[28vw] uppercase leading-none text-transparent tracking-tighter select-none whitespace-nowrap"
           style={{ 
-            WebkitTextStroke: '3px #FFFFFF',
+            WebkitTextStroke: '2px #FFFFFF',
           }}
         >
           RE_mould
@@ -243,8 +261,8 @@ const ScatterGallery: React.FC<ScatterGalleryProps> = ({ cards }) => {
             card={{
               ...card,
               initialPos: {
-                x: card.initialPos.x + (Math.random() * 100 - 50),
-                y: card.initialPos.y + (Math.random() * 100 - 50),
+                x: (card.initialPos.x + (Math.random() * 60 - 30)) * screenScale,
+                y: (card.initialPos.y + (Math.random() * 60 - 30)) * screenScale,
                 rotate: card.initialPos.rotate + (Math.random() * 14 - 7)
               }
             }} 
@@ -255,18 +273,18 @@ const ScatterGallery: React.FC<ScatterGalleryProps> = ({ cards }) => {
       </div>
 
       {/* Bộ điều khiển Phân tán */}
-      <div className="absolute bottom-16 right-16 z-50">
+      <div className="absolute bottom-6 right-4 sm:bottom-16 sm:right-16 z-50">
         <button 
           onClick={shuffle}
-          className="group flex items-center gap-6 bg-[#FF009C] text-white border-2 border-black px-8 py-5 hover:bg-black hover:text-white transition-all shadow-[12px_12px_0px_0px_rgba(0,0,0,1)] hover:shadow-none translate-x-[-6px] translate-y-[-6px] hover:translate-x-0 hover:translate-y-0"
+          className="group flex items-center gap-3 sm:gap-6 bg-[#FF009C] text-white border-2 border-black px-5 py-3 sm:px-8 sm:py-5 hover:bg-black hover:text-white transition-all shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] sm:shadow-[12px_12px_0px_0px_rgba(0,0,0,1)] hover:shadow-none translate-x-[-3px] translate-y-[-3px] sm:translate-x-[-6px] sm:translate-y-[-6px] hover:translate-x-0 hover:translate-y-0"
         >
-          <span className="font-display text-2xl uppercase tracking-[0.2em]">Shuffle_Lab</span>
-          <RefreshCw size={24} className="group-hover:rotate-180 transition-transform duration-1000" />
+          <span className="font-display text-lg sm:text-2xl uppercase tracking-[0.15em] sm:tracking-[0.2em]">Shuffle_Lab</span>
+          <RefreshCw size={20} className="group-hover:rotate-180 transition-transform duration-1000" />
         </button>
       </div>
 
       {/* Hướng dẫn ở chân trang */}
-      <div className="absolute bottom-16 left-16 z-50 pointer-events-none">
+      <div className="absolute bottom-6 left-4 sm:bottom-16 sm:left-16 z-50 pointer-events-none hidden sm:block">
         <div className="flex flex-col gap-3">
           <div className="flex items-center gap-3">
             <div className="w-8 h-[2px] bg-white"></div>
