@@ -326,3 +326,32 @@
   animation: float 4s ease-in-out infinite;
   will-change: transform;
 }
+
+/* Fix 3D canvas misalignment due to CSS scale transform on the container */
+.canvas-container canvas {
+  width: 100% !important;
+  height: 100% !important;
+}
+
+/* ── Workshop Viewport Auto-Fitting Zoom ── */
+@media (min-width: 1024px) {
+  .workshop-viewport {
+    zoom: 0.9;
+    transform-origin: top center;
+  }
+}
+@media (max-width: 1600px) and (min-width: 1024px) {
+  .workshop-viewport {
+    zoom: 0.8;
+  }
+}
+@media (max-width: 1400px) and (min-width: 1024px) {
+  .workshop-viewport {
+    zoom: 0.72;
+  }
+}
+@media (max-width: 1200px) and (min-width: 1024px) {
+  .workshop-viewport {
+    zoom: 0.65;
+  }
+}

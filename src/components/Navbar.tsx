@@ -92,7 +92,7 @@ export default function Navbar({ activePage, onNavigate }: NavbarProps) {
                   onClick={() => onNavigate(item.id)}
                   style={{ paddingLeft: NAV_CONFIG.px, paddingRight: NAV_CONFIG.px }}
                   className={cn(
-                    "h-full font-mono transition-all flex items-center gap-2 relative group uppercase overflow-hidden",
+                    "h-full font-display font-bold transition-all flex items-center gap-2 relative group uppercase overflow-hidden",
                     activePage === item.id
                       ? isAboutPage
                         ? "text-[#FF009C]"
@@ -151,7 +151,7 @@ export default function Navbar({ activePage, onNavigate }: NavbarProps) {
                   type="text"
                   placeholder="SEARCH_SYS..."
                   className={cn(
-                    "bg-transparent border-none outline-none font-mono text-[10px] w-24 md:w-32",
+                    "bg-transparent border-none outline-none font-display font-bold text-[10px] w-24 md:w-32",
                     isAboutPage
                       ? "text-[#FF009C] placeholder:text-[#FF009C]/60 focus:placeholder:text-[#D1FF00]/60"
                       : "text-[#0020D7] placeholder:text-[#FF009C]/40"
@@ -183,7 +183,7 @@ export default function Navbar({ activePage, onNavigate }: NavbarProps) {
               <button
                 onClick={() => onNavigate("admin")}
                 className={cn(
-                  "md:flex items-center gap-2 px-4 h-8 font-mono text-[10px] transition-all uppercase tracking-widest font-bold",
+                  "md:flex items-center gap-2 px-4 h-8 font-display text-[10px] transition-all uppercase tracking-widest font-bold",
                   isAboutPage
                     ? "bg-[#D1FF00] text-[#FF009C] border border-[#FFFFFF] hover:bg-[#FF009C] hover:text-[#FFFFFF] hover:border-[#D1FF00]"
                     : "bg-[#0020D7] text-[#D1FF00] border border-[#FF009C] hover:bg-[#D1FF00] hover:text-[#0020D7]"

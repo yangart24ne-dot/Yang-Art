@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import * as fabric from 'fabric';
 import { cn } from '../lib/utils';
 import { MaterialConfig, StrokeData } from '../types';
+import { RECYCLED_MATERIALS } from '../constants/materials';
 import { MousePointer, PaintBucket, Trash2, Undo2, Redo2, CircleDot } from 'lucide-react';
 import { contours } from 'd3-contour';
 import { BRAND } from '@/src/lib/brand-colors';
@@ -25,6 +26,7 @@ export interface AssetOffsetScale {
   offsetX: number;
   offsetY: number;
   scale: number;
+  aspectRatio?: string;
 }
 
 export interface CanvasAssetsConfig {
@@ -122,11 +124,17 @@ export const DrawingCanvas: React.FC<DrawingCanvasProps> = ({
   const [redoStack, setRedoStack] = useState<string[]>([]);
   const [selectedBaseShape, setSelectedBaseShape] = useState<string | null>(null);
   const [baseScale, setBaseScale] = useState(2.0);
+  const [baseFillColor, setBaseFillColor] = useState<string>('rgba(0,0,0,0)');
+  const [baseFillMaterialId, setBaseFillMaterialId] = useState<string | undefined>(undefined);
 
   const brushColorRef = useRef(brushColor);
   const brushSizeRef = useRef(brushSize);
+  const bucketMaterialRef = useRef(bucketMaterial);
+  const isFillingModeRef = useRef(isFillingMode);
   brushColorRef.current = brushColor;
   brushSizeRef.current = brushSize;
+  bucketMaterialRef.current = bucketMaterial;
+  isFillingModeRef.current = isFillingMode;
 
   const applyBaseShapeNoCache = (canvas: fabric.Canvas) => {
     const base = canvas.getObjects().find((o: any) => o.customLayer === 'base');
@@ -165,12 +173,18 @@ export const DrawingCanvas: React.FC<DrawingCanvasProps> = ({
       const path = e.path as fabric.Path;
       const color = brushColorRef.current;
       const width = brushSizeRef.current;
+      
+      // Auto-match brush color with materials to assign materialId
+      const matchedMat = RECYCLED_MATERIALS.find(
+        m => m.color.toLowerCase() === color.toLowerCase()
+      );
+      
       path.set({
         customLayer: 'detail',
         stroke: color,
         strokeWidth: width,
         fill: null,
-        materialId: undefined,
+        materialId: matchedMat ? matchedMat.id : undefined,
         selectable: true,
         evented: true,
         objectCaching: false,
@@ -185,17 +199,37 @@ export const DrawingCanvas: React.FC<DrawingCanvasProps> = ({
     });
 
     canvas.on('mouse:down', (e) => {
-      if (!isFillingMode || !e.target) return;
+      // Use ref to always have the latest bucketMaterial (avoid stale closure)
+      const mat = bucketMaterialRef.current;
+      const filling = isFillingModeRef.current;
+      if (!filling) return;
+
+      if (!e.target) {
+        // Click on empty canvas area — fill the base shape if it exists
+        const base = canvas.getObjects().find((o: any) => o.customLayer === 'base');
+        if (base) {
+          (base as any).set({ fill: mat.color, stroke: mat.color });
+          setBaseFillColor(mat.color);
+          setBaseFillMaterialId(mat.id);
+          onUpdateBaseMaterial(mat.id);
+          canvas.requestRenderAll();
+          const json = JSON.stringify(canvas.toObject(['customLayer', 'materialId', 'objectCaching']));
+          setHistory(prev => [...prev, json]);
+        }
+        return;
+      }
 
       const obj = e.target as any;
       if (obj.customLayer === 'base') {
         obj.set({
-          fill: bucketMaterial.color,
-          stroke: bucketMaterial.color
+          fill: mat.color,
+          stroke: mat.color
         });
-        onUpdateBaseMaterial(bucketMaterial.id);
+        setBaseFillColor(mat.color);
+        setBaseFillMaterialId(mat.id);
+        onUpdateBaseMaterial(mat.id);
       } else if (obj.customLayer === 'detail') {
-        obj.set({ stroke: bucketMaterial.color, materialId: bucketMaterial.id });
+        obj.set({ stroke: mat.color, materialId: mat.id });
       }
 
       canvas.requestRenderAll();
@@ -310,6 +344,10 @@ export const DrawingCanvas: React.FC<DrawingCanvasProps> = ({
       scaleY: 2.0,
     });
 
+    // Reset fill tracking when a new shape is loaded
+    setBaseFillColor('rgba(0,0,0,0)');
+    setBaseFillMaterialId(undefined);
+
 
     path.lockRotation = true;
     path.setControlsVisibility({ mtr: false });
@@ -398,15 +436,36 @@ export const DrawingCanvas: React.FC<DrawingCanvasProps> = ({
       return;
     }
 
+    console.log("FABRIC_CANVAS_DIMENSIONS", { width, height });
+    console.log("BASE_OBJECT_PROPERTIES", {
+      left: baseObj.left,
+      top: baseObj.top,
+      scaleX: baseObj.scaleX,
+      scaleY: baseObj.scaleY,
+      originX: baseObj.originX,
+      originY: baseObj.originY,
+      pathOffsetX: (baseObj as any).pathOffset?.x,
+      pathOffsetY: (baseObj as any).pathOffset?.y,
+    });
+
     const processBase = () => {
       const shapeData = BASE_SHAPES.find(s => s.id === selectedBaseShape);
       if (!shapeData) return;
+
+      // Get the actual fill color from the canvas base object
+      const baseObj2 = canvas.getObjects().find((obj: any) => obj.customLayer === 'base') as any;
+      const actualFill = baseObj2?.fill;
+      // Use the canvas fill color if it's a real color (not transparent)
+      const baseColor = (actualFill && actualFill !== 'rgba(0,0,0,0)' && actualFill !== 'transparent')
+        ? actualFill as string
+        : (baseFillColor && baseFillColor !== 'rgba(0,0,0,0)' ? baseFillColor : BRAND.blue);
 
       strokes.push({
         id: `base-${Date.now()}`,
         points: [],
         pathData: shapeData.path,
-        color: BRAND.blue,
+        color: baseColor,
+        materialId: baseFillMaterialId,
         layer: 'base'
       });
     };
@@ -417,13 +476,13 @@ export const DrawingCanvas: React.FC<DrawingCanvasProps> = ({
 
       const materialGroups = new Map<string, any[]>();
       details.forEach((obj: any) => {
-        const key = `${obj.stroke}-${obj.materialId || 'default'}`;
+        const key = `${obj.stroke}|${obj.materialId || 'default'}`;
         if (!materialGroups.has(key)) materialGroups.set(key, []);
         materialGroups.get(key)!.push(obj);
       });
 
       materialGroups.forEach((groupStrokes, key) => {
-        const [color, materialId] = key.split('-');
+        const [color, materialId] = key.split('|');
         const offCanvas = document.createElement('canvas');
         offCanvas.width = width;
         offCanvas.height = height;
@@ -563,7 +622,7 @@ export const DrawingCanvas: React.FC<DrawingCanvasProps> = ({
             transformOrigin: 'left center'
           }}
         >
-          <img src={assetChooseBase} className="h-16 w-auto object-contain" alt="Step 1: Choose Base Shape" />
+          <img src={assetChooseBase} className="h-16 w-auto object-contain pointer-events-none select-none" alt="Step 1: Choose Base Shape" />
         </div>
         <div 
           className="grid grid-cols-6 w-full pt-1 justify-items-center"
@@ -595,7 +654,7 @@ export const DrawingCanvas: React.FC<DrawingCanvasProps> = ({
                 <img
                   src={shape.image}
                   alt={shape.name}
-                  className="object-contain animate-in zoom-in-95 duration-200"
+                  className="object-contain animate-in zoom-in-95 duration-200 pointer-events-none select-none"
                   style={{
                     width: `${cfg.basePresets.imageWidth}px`,
                     height: `${cfg.basePresets.imageHeight}px`
@@ -619,12 +678,12 @@ export const DrawingCanvas: React.FC<DrawingCanvasProps> = ({
             transformOrigin: 'left center'
           }}
         >
-          <img src={assetDrawDetails} className="h-16 w-auto object-contain" alt="Step 2: Draw Details" />
+          <img src={assetDrawDetails} className="h-16 w-auto object-contain pointer-events-none select-none" alt="Step 2: Draw Details" />
         </div>
 
         <div className="flex flex-col md:flex-row gap-6 w-full items-stretch mt-1 overflow-visible">
           {/* SIDEBAR TOOLS (LEFT) */}
-          <div className="flex flex-row md:flex-col gap-4 md:w-44 shrink-0 p-1 justify-start items-center">
+          <div className="flex flex-row md:flex-col gap-4 md:w-44 shrink-0 p-1 justify-start items-center relative z-20">
             <div className="flex flex-col gap-4 w-full items-stretch">
               {/* SELECT MODE BUTTON */}
               <div
@@ -645,7 +704,7 @@ export const DrawingCanvas: React.FC<DrawingCanvasProps> = ({
                       : "brightness-95 hover:brightness-100"
                   )}
                 >
-                  <img src={assetSelectMode} className="w-full h-auto" alt="Select Mode" />
+                  <img src={assetSelectMode} className="w-full h-auto pointer-events-none select-none" alt="Select Mode" />
                 </button>
               </div>
 
@@ -668,7 +727,7 @@ export const DrawingCanvas: React.FC<DrawingCanvasProps> = ({
                       : "brightness-95 hover:brightness-100"
                   )}
                 >
-                  <img src={assetPaintBucket} className="w-full h-auto" alt="Paint Bucket" />
+                  <img src={assetPaintBucket} className="w-full h-auto pointer-events-none select-none" alt="Paint Bucket" />
                 </button>
               </div>
 
@@ -774,7 +833,7 @@ export const DrawingCanvas: React.FC<DrawingCanvasProps> = ({
                     className="w-8 h-8 transition-transform hover:scale-110 active:scale-90 cursor-pointer border-none bg-transparent p-0"
                     title="Clear Canvas"
                   >
-                    <img src={assetTrashIcon} className="w-full h-full object-contain" alt="Clear" />
+                    <img src={assetTrashIcon} className="w-full h-full object-contain pointer-events-none select-none" alt="Clear" />
                   </button>
                 </div>
                 <div
@@ -789,7 +848,7 @@ export const DrawingCanvas: React.FC<DrawingCanvasProps> = ({
                     className="w-8 h-8 transition-transform hover:scale-110 active:scale-90 cursor-pointer border-none bg-transparent p-0 disabled:opacity-30"
                     title="Undo"
                   >
-                    <img src={assetUndoIcon} className="w-full h-full object-contain" alt="Undo" />
+                    <img src={assetUndoIcon} className="w-full h-full object-contain pointer-events-none select-none" alt="Undo" />
                   </button>
                 </div>
                 <div
@@ -804,7 +863,7 @@ export const DrawingCanvas: React.FC<DrawingCanvasProps> = ({
                     className="w-8 h-8 transition-transform hover:scale-110 active:scale-90 cursor-pointer border-none bg-transparent p-0 disabled:opacity-30"
                     title="Redo"
                   >
-                    <img src={assetRedoIcon} className="w-full h-full object-contain" alt="Redo" />
+                    <img src={assetRedoIcon} className="w-full h-full object-contain pointer-events-none select-none" alt="Redo" />
                   </button>
                 </div>
               </div>
@@ -812,7 +871,7 @@ export const DrawingCanvas: React.FC<DrawingCanvasProps> = ({
 
             {/* ILLUSTRATION MASCOT */}
             <div 
-              className="hidden md:flex pt-4 self-center justify-center w-full"
+              className="hidden md:flex pt-4 self-center justify-center w-full relative z-20 pointer-events-none"
               style={{
                 transform: `translate(${cfg.mascot.offsetX}px, ${cfg.mascot.offsetY}px) scale(${cfg.mascot.scale})`,
                 transformOrigin: 'center'
@@ -820,7 +879,7 @@ export const DrawingCanvas: React.FC<DrawingCanvasProps> = ({
             >
               <img
                 src={assetCharacter}
-                className="w-32 h-auto object-contain select-none"
+                className="w-32 h-auto object-contain select-none pointer-events-none"
                 alt="Yang Studio Mascot"
               />
             </div>
@@ -830,24 +889,36 @@ export const DrawingCanvas: React.FC<DrawingCanvasProps> = ({
           <div 
             className="flex-1 relative overflow-visible self-center w-full flex flex-col"
             style={{
-              aspectRatio: '1138.09 / 1221.57',
+              aspectRatio: cfg.canvasFrame.aspectRatio || '1138.09 / 1221.57',
               transform: `translate(${cfg.canvasFrame.offsetX}px, ${cfg.canvasFrame.offsetY}px) scale(${cfg.canvasFrame.scale})`,
-              transformOrigin: 'center'
+              transformOrigin: 'center',
+              containerType: 'size'
             }}
           >
             {/* Asset 46 Canvas Frame */}
-            <div className="absolute inset-0 pointer-events-none z-0">
+            <div 
+              className="absolute pointer-events-none z-0"
+              style={{
+                top: `${3 / cfg.canvasFrame.scale}px`,
+                left: `${3 / cfg.canvasFrame.scale}px`,
+                right: `${3 / cfg.canvasFrame.scale}px`,
+                bottom: `${3 / cfg.canvasFrame.scale}px`,
+              }}
+            >
               <svg 
-                viewBox="0 0 1138.09 1221.57" 
-                preserveAspectRatio="none" 
-                className="w-full h-full select-none"
+                className="w-full h-full select-none overflow-visible"
               >
-                <path 
+                <rect 
+                  x="0"
+                  y="0"
+                  width="100%"
+                  height="100%"
                   fill="#fff" 
                   stroke="blue" 
                   strokeMiterlimit={10} 
-                  strokeWidth={6} 
-                  d="M61.16,3h1015.76c32.1,0,58.16,26.06,58.16,58.16v1099.25c0,32.1-26.06,58.16-58.16,58.16H61.16c-32.1,0-58.16-26.06-58.16-58.16V61.16C3,29.06,29.06,3,61.16,3Z"
+                  strokeWidth={6 / cfg.canvasFrame.scale} 
+                  rx={`${5.2 / cfg.canvasFrame.scale}cqmin`}
+                  ry={`${5.2 / cfg.canvasFrame.scale}cqmin`}
                 />
               </svg>
             </div>
@@ -855,11 +926,11 @@ export const DrawingCanvas: React.FC<DrawingCanvasProps> = ({
               ref={wrapperRef} 
               className="absolute bg-white overflow-hidden z-10"
               style={{
-                left: '5.37%',
-                right: '5.37%',
-                top: '5%',
-                bottom: '5%',
-                borderRadius: '5.1%'
+                left: `${5.4 / cfg.canvasFrame.scale}cqmin`,
+                right: `${5.4 / cfg.canvasFrame.scale}cqmin`,
+                top: `${5.4 / cfg.canvasFrame.scale}cqmin`,
+                bottom: `${5.4 / cfg.canvasFrame.scale}cqmin`,
+                borderRadius: `${4.7 / cfg.canvasFrame.scale}cqmin`
               }}
             >
               <canvas ref={canvasRef} />
@@ -873,26 +944,24 @@ export const DrawingCanvas: React.FC<DrawingCanvasProps> = ({
                       transformOrigin: 'center'
                     }}
                   >
-                    <img src={assetSelectBasePrompt} className="w-72 h-auto object-contain" alt="Select Base Shape Prompt" />
+                    <img src={assetSelectBasePrompt} className="w-72 h-auto object-contain pointer-events-none select-none" alt="Select Base Shape Prompt" />
                   </div>
                 </div>
               )}
             </div>
 
             {/* GENERATE 3D BUTTON (OVERLAPPING BOTTOM RIGHT) */}
-            {selectedBaseShape && (
-              <button
-                onClick={handleGenerate}
-                className="absolute bottom-0 right-0 z-20 transition-transform hover:scale-105 active:scale-95 cursor-pointer border-none bg-transparent p-0"
-                title="Generate 3D Model"
-                style={{
-                  transform: `translate(${cfg.generate3DButton.offsetX}px, ${cfg.generate3DButton.offsetY}px) scale(${cfg.generate3DButton.scale})`,
-                  transformOrigin: 'bottom right'
-                }}
-              >
-                <img src={assetGenerate3D} className="w-44 h-auto" alt="Generate 3D" />
-              </button>
-            )}
+            <button
+              onClick={handleGenerate}
+              className="absolute bottom-0 right-0 z-20 transition-transform hover:scale-105 active:scale-95 cursor-pointer border-none bg-transparent p-0"
+              title="Generate 3D Model"
+              style={{
+                transform: `translate(${cfg.generate3DButton.offsetX}px, ${cfg.generate3DButton.offsetY}px) scale(${cfg.generate3DButton.scale})`,
+                transformOrigin: 'bottom right'
+              }}
+            >
+              <img src={assetGenerate3D} className="w-44 h-auto pointer-events-none select-none" alt="Generate 3D" />
+            </button>
 
             {/* Subtle drawing mode status bar inside canvas */}
             {selectedBaseShape && (

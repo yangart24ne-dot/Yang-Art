@@ -1,6 +1,6 @@
 import React, { useMemo, useRef, useState, useEffect } from 'react';
-import { Canvas, useThree } from '@react-three/fiber';
-import { OrbitControls, Stage, PerspectiveCamera, Environment, useCursor } from '@react-three/drei';
+import { Canvas, useThree, events } from '@react-three/fiber';
+import { OrbitControls, PerspectiveCamera, Environment, useCursor } from '@react-three/drei';
 import * as THREE from 'three';
 // @ts-ignore
 import { STLExporter } from 'three/examples/jsm/exporters/STLExporter';
@@ -13,6 +13,16 @@ import { pointsToShape, svgPathToShapes, getGlobalTransform, applyLaplacianSmoot
 import { refineGeometry } from '../lib/mesh-processor';
 
 import { RECYCLED_MATERIALS } from '../constants/materials';
+
+/** Lighten a hex color by a given amount (0-1) for hover highlight */
+const lightenColor = (hex: string, amount: number): string => {
+  const num = parseInt(hex.replace('#', ''), 16);
+  const r = Math.min(255, (num >> 16) + Math.round(255 * amount));
+  const g = Math.min(255, ((num >> 8) & 0xff) + Math.round(255 * amount));
+  const b = Math.min(255, (num & 0xff) + Math.round(255 * amount));
+  return `#${r.toString(16).padStart(2, '0')}${g.toString(16).padStart(2, '0')}${b.toString(16).padStart(2, '0')}`;
+};
+
 
 // Pop-Art SVG imports
 import assetGLBButton from '../../assets/info workshop/SVG/Asset 48.svg';
@@ -27,10 +37,9 @@ export interface ViewerAssetsConfig {
   stlButton: { offsetX: number; offsetY: number; scale: number };
   glbButton: { offsetX: number; offsetY: number; scale: number };
   wireframeButton: { offsetX: number; offsetY: number; scale: number };
-  viewerFrame: { offsetX: number; offsetY: number; scale: number };
+  viewerFrame: { offsetX: number; offsetY: number; scale: number; aspectRatio?: string };
   waitingPrompt: { offsetX: number; offsetY: number; scale: number };
-  depthLabel: { offsetX: number; offsetY: number; scale: number };
-  thicknessLabel: { offsetX: number; offsetY: number; scale: number };
+  slidersCard?: { offsetX: number; offsetY: number; scale: number };
 }
 
 const DEFAULT_VIEWER_CONFIG: ViewerAssetsConfig = {
@@ -39,8 +48,7 @@ const DEFAULT_VIEWER_CONFIG: ViewerAssetsConfig = {
   wireframeButton: { offsetX: 0, offsetY: 0, scale: 1.0 },
   viewerFrame: { offsetX: 0, offsetY: 0, scale: 1.0 },
   waitingPrompt: { offsetX: 0, offsetY: 0, scale: 1.0 },
-  depthLabel: { offsetX: 0, offsetY: 0, scale: 1.0 },
-  thicknessLabel: { offsetX: 0, offsetY: 0, scale: 1.0 },
+  slidersCard: { offsetX: 0, offsetY: 0, scale: 1.0 },
 };
 
 interface Viewer3DProps {
@@ -57,6 +65,7 @@ interface Viewer3DProps {
   subdivisionLevel: number;
   retopologyDecimate: number;
   assetsConfig?: ViewerAssetsConfig;
+  onSelectMaterial?: (material: MaterialConfig) => void;
 }
 
 const CANVAS_SIZE = 500;
@@ -99,10 +108,12 @@ const BackSideMark: React.FC<{
     canvas.height = 1024;
     const ctx = canvas.getContext('2d')!;
 
-    ctx.clearRect(0, 0, 1024, 1024);
+    // Fill background with solid black (0 in alphaMap = transparent)
+    ctx.fillStyle = '#000000';
+    ctx.fillRect(0, 0, 1024, 1024);
 
-    // Styling the engraving
-    ctx.fillStyle = 'white';
+    // Styling the engraving (white = 1 in alphaMap = opaque text)
+    ctx.fillStyle = '#ffffff';
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
     ctx.font = 'black 120px "Courier New", monospace';
@@ -148,14 +159,14 @@ const MeshPart: React.FC<{
   activeMaterial: MaterialConfig,
   extrudeSettings: ExtrudeSettings,
   style: GeometryStyle,
-  onClick: () => void,
+  onMeshClick: (id: string) => void,
   smoothBrushActive: boolean,
   smoothRadius: number,
   smoothStrength: number,
   showWireframe?: boolean,
   subdivisionLevel: number,
   retopologyDecimate: number
-}> = ({ stroke, baseShapeId, index, activeMaterial, extrudeSettings, style, onClick, smoothBrushActive, smoothRadius, smoothStrength, showWireframe = false, subdivisionLevel, retopologyDecimate }) => {
+}> = ({ stroke, baseShapeId, index, activeMaterial, extrudeSettings, style, onMeshClick, smoothBrushActive, smoothRadius, smoothStrength, showWireframe = false, subdivisionLevel, retopologyDecimate }) => {
   const meshRef = useRef<THREE.Mesh>(null);
   const [hovered, setHovered] = useState(false);
   const [brushPos, setBrushPos] = useState<THREE.Vector3 | null>(null);
@@ -163,53 +174,58 @@ const MeshPart: React.FC<{
 
   // MATERIAL LOOKUP: Pull realistic plastic properties for each specific part
   const materialProps = useMemo(() => {
-    const mat = RECYCLED_MATERIALS.find(m => m.id === stroke.materialId);
+    // 1. Tìm theo materialId trước
+    let mat = RECYCLED_MATERIALS.find(m => m.id === stroke.materialId);
+    
+    // 2. Nếu không có materialId, tự động đối chiếu stroke.color với bảng màu vật liệu chính thức
+    if (!mat && stroke.color) {
+      mat = RECYCLED_MATERIALS.find(m => 
+        m.color.toLowerCase() === stroke.color.toLowerCase()
+      );
+    }
+    
+    // 3. Nếu vẫn không khớp (ví dụ màu tự do khác), dùng trực tiếp stroke.color để hiển thị đúng màu thay vì đổi sang màu xám
     if (!mat) {
-      // NEUTRAL FALLBACK: Unfilled shapes look like a gray mold/clay
-      return { id: 'unfilled', name: 'Unfilled', color: '#888888', roughness: 0.9, metalness: 0.05 };
+      return { 
+        id: 'custom', 
+        name: 'Custom', 
+        color: stroke.color || '#888888', 
+        roughness: 0.8, 
+        metalness: 0.1 
+      };
     }
     return mat;
-  }, [stroke.materialId]);
+  }, [stroke.materialId, stroke.color]);
 
   const isBase = stroke.layer === 'base';
   const tubeRadius = 3.0;
 
   // DYNAMIC Z-PLACEMENT:
-  // Calculate Z position so that detail strokes sit perfectly on the front surface of the base shape,
-  // preventing any gaps/separation when scaling depth or thickness.
   let zPosition = 0;
   if (!isBase) {
-    const baseFrontZ = extrudeSettings.depth / 2;
+    const baseFrontZ = extrudeSettings.depth / 2 + (extrudeSettings.bevelEnabled ? extrudeSettings.bevelThickness : 0);
     if (stroke.pathData) {
-      // Extruded detail shape
       const detailHalfDepth = extrudeSettings.detailThickness / 2;
-      zPosition = baseFrontZ + detailHalfDepth - 0.1; // 0.1 overlap to prevent gaps
+      zPosition = baseFrontZ + detailHalfDepth - 0.1;
     } else {
-      // Tube detail stroke
-      zPosition = baseFrontZ + tubeRadius - 0.1; // 0.1 overlap to prevent gaps
+      zPosition = baseFrontZ + tubeRadius - 0.1;
     }
   }
 
   const geometry = useMemo(() => {
     let rawGeo: THREE.BufferGeometry | null = null;
     if (isBase || (stroke.layer === 'detail' && stroke.pathData)) {
-      // 1. BASE SHAPE: Use ExtrudeGeometry
       let rawShapes: THREE.Shape[] = [];
-
       if (stroke.pathData) {
         rawShapes = svgPathToShapes(stroke.pathData);
       }
-
       if (rawShapes.length === 0) {
         const fallbackShape = pointsToShape(stroke.points);
         if (fallbackShape) rawShapes = [fallbackShape];
       }
-
       if (rawShapes.length === 0) return null;
 
-      // Depth logic: Base uses user setting, Details use the dynamic detailThickness setting
       const depth = isBase ? extrudeSettings.depth : extrudeSettings.detailThickness;
-
       const geo = new THREE.ExtrudeGeometry(rawShapes, {
         ...extrudeSettings,
         depth,
@@ -219,9 +235,6 @@ const MeshPart: React.FC<{
         bevelSegments: isBase ? extrudeSettings.bevelSegments : 0,
         steps: 1
       });
-      // EXACT ALIGNMENT MAPPING: Both SVG and Strokes are now mathematically perfectly aligned.
-      // 1. Scale Y by -1 to match Three.js coordinate system with Canvas Y down.
-      // 2. Translate by -250, +250 to bring the center of the 500x500 path exactly to (0,0).
       geo.scale(1, -1, 1);
       geo.translate(-250, 250, 0);
       geo.computeBoundingBox();
@@ -232,31 +245,22 @@ const MeshPart: React.FC<{
       }
       rawGeo = geo;
     } else {
-      // 2. DETAIL STROKES: Ultra-safe generation
       if (!stroke.points || stroke.points.length === 0) return null;
-
-      // Apply 2D RDP simplification first to smooth out hand-drawn points
       const simplifiedPoints = simplifyPathRDP(stroke.points, 1.0);
-
-      // PREVENT SILENT CRASHES: Handle single-point strokes (dots)
       if (simplifiedPoints.length === 1) {
         const p = simplifiedPoints[0];
-        // Render a cylinder acting as a dot
         const geo = new THREE.CylinderGeometry(tubeRadius, tubeRadius, 1, 16);
-        geo.rotateX(Math.PI / 2); // Orient towards camera
+        geo.rotateX(Math.PI / 2);
         geo.translate(p.x - 250, 250 - p.y, 0);
         rawGeo = geo;
       } else {
-        // Filter out consecutive duplicate points (distance > 0.1)
         const filteredPoints = simplifiedPoints.filter((p, i, arr) => {
           if (i === 0) return true;
           const prev = arr[i - 1];
           const distSq = Math.pow(p.x - prev.x, 2) + Math.pow(p.y - prev.y, 2);
-          return distSq > 0.01; // distance > 0.1
+          return distSq > 0.01;
         });
-
         if (filteredPoints.length < 2) {
-          // Fallback to cylinder if filtering left us with 1 point
           const p = filteredPoints[0] || simplifiedPoints[0];
           const geo = new THREE.CylinderGeometry(tubeRadius, tubeRadius, 1, 16);
           geo.rotateX(Math.PI / 2);
@@ -264,7 +268,6 @@ const MeshPart: React.FC<{
           rawGeo = geo;
         } else {
           const curvePoints = filteredPoints.map(p => new THREE.Vector3(p.x - 250, 250 - p.y, 0));
-
           try {
             const curve = new THREE.CatmullRomCurve3(curvePoints);
             rawGeo = new THREE.TubeGeometry(curve, 64, tubeRadius, 8, false);
@@ -275,10 +278,7 @@ const MeshPart: React.FC<{
         }
       }
     }
-
     if (!rawGeo) return null;
-
-    // Apply 3D Welding, Subdivision Surface and Retopology in real-time
     return refineGeometry(rawGeo, subdivisionLevel, retopologyDecimate);
   }, [stroke, extrudeSettings, isBase, subdivisionLevel, retopologyDecimate]);
 
@@ -286,10 +286,8 @@ const MeshPart: React.FC<{
 
   const handlePointerMove = (e: any) => {
     if (!smoothBrushActive || !meshRef.current) return;
-
     const point = e.point;
     setBrushPos(point);
-
     if (e.buttons) {
       const localPoint = meshRef.current.worldToLocal(point.clone());
       applyLaplacianSmoothing(meshRef.current.geometry, localPoint, smoothRadius, smoothStrength);
@@ -306,19 +304,19 @@ const MeshPart: React.FC<{
         castShadow
         receiveShadow
         position={[0, 0, zPosition]}
+        onPointerOver={(e) => { e.stopPropagation(); setHovered(true); }}
+        onPointerOut={(e) => { e.stopPropagation(); setHovered(false); }}
         onClick={(e) => {
           e.stopPropagation();
-          if (!smoothBrushActive) onClick();
+          if (!smoothBrushActive) onMeshClick(stroke.id); // Gọi callback đổi màu khi click
         }}
-        onPointerOver={() => setHovered(true)}
-        onPointerOut={() => setHovered(false)}
       >
         <meshStandardMaterial
-          color={meshColor}
-          roughness={materialProps.roughness}
-          metalness={materialProps.metalness}
+          color={materialProps.color}        // Màu sắc đổ vào 3D
+          roughness={materialProps.roughness}  // Độ nhám của bề mặt nhựa/vật liệu
+          metalness={materialProps.metalness}  // Độ ánh kim
           flatShading={style === 'lowpoly'}
-          envMapIntensity={1.5}
+          envMapIntensity={0.1}
           side={THREE.DoubleSide}
         />
         {showWireframe && (
@@ -341,6 +339,57 @@ const MeshPart: React.FC<{
   );
 };
 
+
+
+
+// AUTO-FRAME: Reads model bounding box and positions camera + OrbitControls target
+// so the model is always perfectly centered in the viewport after each Generate.
+const SceneFitter: React.FC<{
+  groupRef: React.RefObject<THREE.Group>;
+  controlsRef: React.RefObject<any>;
+  strokesVersion: number;
+}> = ({ groupRef, controlsRef, strokesVersion }) => {
+  const { camera, size } = useThree();
+
+  useEffect(() => {
+    // Give React + Three.js one frame to finish building geometries before measuring
+    const timeout = setTimeout(() => {
+      if (!groupRef.current || !controlsRef.current) return;
+      if (groupRef.current.children.length === 0) return;
+
+      const box = new THREE.Box3().setFromObject(groupRef.current);
+      if (box.isEmpty()) return;
+
+      const center = new THREE.Vector3();
+      box.getCenter(center);
+
+      const boxSize = new THREE.Vector3();
+      box.getSize(boxSize);
+
+      // Compute camera distance that fits the model in the viewport with some padding
+      const maxDim = Math.max(boxSize.x, boxSize.y);
+      const vFov = ((camera as THREE.PerspectiveCamera).fov * Math.PI) / 180;
+      const aspect = size.width / size.height;
+      const hFov = 2 * Math.atan(Math.tan(vFov / 2) * aspect);
+      const fitFov = Math.min(vFov, hFov);
+      const distance = (maxDim / 2 / Math.tan(fitFov / 2)) * 1.4; // 1.4 = padding factor
+
+      // Place camera directly in front of the model center (facing directly, front-facing center)
+      camera.position.set(center.x, center.y, center.z + distance);
+      (camera as THREE.PerspectiveCamera).updateProjectionMatrix();
+
+      // Sync OrbitControls target
+      controlsRef.current.target.copy(center);
+      controlsRef.current.update();
+    }, 120);
+
+    return () => clearTimeout(timeout);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [strokesVersion]);
+
+  return null;
+};
+
 export const Viewer3D: React.FC<Viewer3DProps> = ({
   strokes,
   baseShapeId,
@@ -354,11 +403,38 @@ export const Viewer3D: React.FC<Viewer3DProps> = ({
   smoothStrength,
   subdivisionLevel,
   retopologyDecimate,
-  assetsConfig
+  assetsConfig,
+  onSelectMaterial
 }) => {
   const cfg = assetsConfig || DEFAULT_VIEWER_CONFIG;
   const groupRef = useRef<THREE.Group>(null);
   const [showWireframe, setShowWireframe] = useState(false);
+  // Increment each time strokes change to trigger SceneFitter inside Canvas
+  const [strokesVersion, setStrokesVersion] = useState(0);
+
+  useEffect(() => {
+    setStrokesVersion(v => v + 1);
+  }, [strokes]);
+
+
+  // Use refs to always read latest values inside mesh click handler
+  // This avoids stale closure issues when activeMaterial changes
+  const activeMaterialRef = useRef(activeMaterial);
+  const onUpdateStrokeMaterialRef = useRef(onUpdateStrokeMaterial);
+  const smoothBrushActiveRef = useRef(smoothBrushActive);
+  activeMaterialRef.current = activeMaterial;
+  onUpdateStrokeMaterialRef.current = onUpdateStrokeMaterial;
+  smoothBrushActiveRef.current = smoothBrushActive;
+
+  // handleMeshClick: called from MeshPart's R3F onClick.
+  // Reads refs so it always has the latest activeMaterial without re-registration race conditions.
+  const handleMeshClick = (id: string) => {
+    const mat = activeMaterialRef.current;
+    const updateFn = onUpdateStrokeMaterialRef.current;
+    console.log('3D Mesh clicked — applying material:', mat.id, mat.color, 'to:', id);
+    updateFn(id, mat.color, mat.id);
+  };
+
 
   // UNIFIED 1:1 SCALE SYSTEM:
   // Instead of calculating scale based on bounding box, use a stable scale
@@ -427,150 +503,105 @@ export const Viewer3D: React.FC<Viewer3DProps> = ({
         <div 
           className="flex-1 relative overflow-visible self-center w-full flex flex-col justify-between"
           style={{
-            aspectRatio: '1753.91 / 1580.04',
+            aspectRatio: cfg.viewerFrame.aspectRatio || '1753.91 / 1580.04',
             transform: `translate(${cfg.viewerFrame.offsetX}px, ${cfg.viewerFrame.offsetY}px) scale(${cfg.viewerFrame.scale})`,
-            transformOrigin: 'center'
+            transformOrigin: 'center',
+            containerType: 'size'
           }}
         >
           {/* Asset 51 Viewer Frame */}
-          <div className="absolute inset-0 pointer-events-none z-0">
+          <div 
+            className="absolute pointer-events-none z-0"
+            style={{
+              top: `${3 / cfg.viewerFrame.scale}px`,
+              left: `${3 / cfg.viewerFrame.scale}px`,
+              right: `${3 / cfg.viewerFrame.scale}px`,
+              bottom: `${3 / cfg.viewerFrame.scale}px`,
+            }}
+          >
             <svg 
-              viewBox="0 0 1753.91 1580.04" 
-              preserveAspectRatio="none" 
-              className="w-full h-full select-none"
+              className="w-full h-full select-none overflow-visible"
             >
-              <path 
+              <rect 
+                x="0"
+                y="0"
+                width="100%"
+                height="100%"
                 fill="#fff" 
                 stroke="blue" 
                 strokeMiterlimit={10} 
-                strokeWidth={6} 
-                d="M85.24,3h1583.43c45.39,0,82.24,36.85,82.24,82.24v1409.56c0,45.39-36.85,82.24-82.24,82.24H85.24c-45.39,0-82.24-36.85-82.24-82.24V85.24C3,39.85,39.85,3,85.24,3Z"
+                strokeWidth={6 / cfg.viewerFrame.scale} 
+                rx={`${5.2 / cfg.viewerFrame.scale}cqmin`}
+                ry={`${5.2 / cfg.viewerFrame.scale}cqmin`}
               />
             </svg>
           </div>
 
           <div 
-            className="absolute bg-[#F9F9F9] overflow-hidden flex flex-col justify-between z-10"
+            className="absolute bg-[#F9F9F9] overflow-hidden z-10"
             style={{
-              left: '4.86%',
-              right: '4.86%',
-              top: '5.4%',
-              bottom: '5.4%',
-              borderRadius: '4.7%'
+              left: `${5.4 / cfg.viewerFrame.scale}cqmin`,
+              right: `${5.4 / cfg.viewerFrame.scale}cqmin`,
+              top: `${5.4 / cfg.viewerFrame.scale}cqmin`,
+              bottom: `${5.4 / cfg.viewerFrame.scale}cqmin`,
+              borderRadius: `${4.7 / cfg.viewerFrame.scale}cqmin`
             }}
           >
-            {/* Top portion for 3D Canvas */}
-            <div className="flex-1 relative w-full min-h-[300px]">
-              {/* Pop-Art Action Buttons (Top Left) */}
-              <div className="absolute top-4 left-4 z-10 flex items-center gap-2">
-                <div
-                  style={{
-                    transform: `translate(${cfg.stlButton.offsetX}px, ${cfg.stlButton.offsetY}px) scale(${cfg.stlButton.scale})`,
-                    transformOrigin: 'center',
-                    display: 'inline-block'
-                  }}
-                >
-                  <button
-                    onClick={exportToSTL}
-                    disabled={strokes.length === 0}
-                    className="w-14 transition-transform active:scale-95 disabled:opacity-30 disabled:pointer-events-none cursor-pointer border-none bg-transparent p-0"
-                    title="Download STL Model"
-                  >
-                    <img src={assetSTLButton} className="w-full h-auto" alt="STL" />
-                  </button>
-                </div>
-                <div
-                  style={{
-                    transform: `translate(${cfg.glbButton.offsetX}px, ${cfg.glbButton.offsetY}px) scale(${cfg.glbButton.scale})`,
-                    transformOrigin: 'center',
-                    display: 'inline-block'
-                  }}
-                >
-                  <button
-                    onClick={exportToGLB}
-                    disabled={strokes.length === 0}
-                    className="w-14 transition-transform active:scale-95 disabled:opacity-30 disabled:pointer-events-none cursor-pointer border-none bg-transparent p-0"
-                    title="Download GLB Model"
-                  >
-                    <img src={assetGLBButton} className="w-full h-auto" alt="GLB" />
-                  </button>
-                </div>
-                <div
-                  style={{
-                    transform: `translate(${cfg.wireframeButton.offsetX}px, ${cfg.wireframeButton.offsetY}px) scale(${cfg.wireframeButton.scale})`,
-                    transformOrigin: 'center',
-                    display: 'inline-block'
-                  }}
-                >
-                  <button
-                    onClick={() => setShowWireframe(!showWireframe)}
-                    disabled={strokes.length === 0}
-                    className="w-8 transition-transform active:scale-95 disabled:opacity-30 disabled:pointer-events-none cursor-pointer border-none bg-transparent p-0"
-                    title="Toggle Wireframe Overlay"
-                  >
-                    <img src={assetBoxIcon} className="w-full h-auto" alt="Wireframe" />
-                  </button>
-                </div>
-              </div>
+            {/* 3D Canvas (occupies 100% height & width, perfectly centered) */}
+            <div className="absolute inset-0 z-0 canvas-container">
+              <Canvas
+                shadows
+                dpr={[1, 2]}
+                gl={{ antialias: true, preserveDrawingBuffer: true }}
+                events={(state) => ({
+                  ...events(state),
+                  compute: (event, state) => {
+                    const canvas = state.gl.domElement;
+                    const rect = canvas.getBoundingClientRect();
+                    const x = event.clientX - rect.left;
+                    const y = event.clientY - rect.top;
 
-              {/* Control Status and Reset Camera (Top Right) */}
-              <div className="absolute top-4 right-4 z-10 flex items-center gap-2">
-                <button
-                  onClick={handleReset}
-                  className="w-8 h-8 flex items-center justify-center bg-white border-2 border-black rounded-lg hover:scale-110 active:scale-90 transition-transform shadow-md cursor-pointer"
-                  title="Reset Camera"
-                >
-                  <RotateCcw size={16} className="text-black" />
-                </button>
-                <div className={cn(
-                  "flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[8px] font-black uppercase tracking-widest shadow-md border border-gray-100 bg-white/95 text-black select-none pointer-events-none",
-                  smoothBrushActive ? "text-amber-600 border-amber-200" : "text-[#0020D7] border-blue-200"
-                )}>
-                  <span className={cn("w-1.5 h-1.5 rounded-full", smoothBrushActive ? "bg-amber-500" : "bg-[#0020D7]")} />
-                  <span>{smoothBrushActive ? "Sculpting" : "Painting"}</span>
-                </div>
-              </div>
-
-              {strokes.length === 0 && (
-                <div className="absolute inset-0 bg-[#F9F9F9] flex flex-col items-center justify-center z-10 pointer-events-none select-none p-8">
-                  <div
-                    style={{
-                      transform: `translate(${cfg.waitingPrompt.offsetX}px, ${cfg.waitingPrompt.offsetY}px) scale(${cfg.waitingPrompt.scale})`,
-                      transformOrigin: 'center'
-                    }}
-                  >
-                    <img src={assetWaitingPrompt} className="w-72 h-auto object-contain" alt="Waiting for Input" />
-                  </div>
-                </div>
-              )}
-              <Canvas shadows dpr={[1, 2]} gl={{ antialias: true, preserveDrawingBuffer: true }}>
+                    state.pointer.set((x / rect.width) * 2 - 1, -(y / rect.height) * 2 + 1);
+                    state.raycaster.setFromCamera(state.pointer, state.camera);
+                  }
+                })}
+              >
+                {/* Auto-frame camera to model bounding box after each Generate */}
+                <SceneFitter
+                  groupRef={groupRef}
+                  controlsRef={controlsRef}
+                  strokesVersion={strokesVersion}
+                />
                 <PerspectiveCamera makeDefault position={[0, 0, 125]} fov={45} />
-                <Stage environment="city" intensity={0.8} shadows={false} adjustCamera={false}>
-                  <group
-                    ref={groupRef}
-                    scale={[globalTransform.scale, globalTransform.scale, globalTransform.scale]}
-                    position={[0, 0, 0]}
-                  >
-                    {strokes.map((stroke, index) => (
-                      <MeshPart
-                        key={stroke.id}
-                        stroke={stroke}
-                        baseShapeId={baseShapeId}
-                        index={index}
-                        activeMaterial={activeMaterial}
-                        extrudeSettings={extrudeSettings}
-                        style={style}
-                        onClick={() => onUpdateStrokeMaterial(stroke.id, activeMaterial.color, activeMaterial.id)}
-                        smoothBrushActive={smoothBrushActive}
-                        smoothRadius={smoothRadius}
-                        smoothStrength={smoothStrength}
-                        showWireframe={showWireframe}
-                        subdivisionLevel={subdivisionLevel}
-                        retopologyDecimate={retopologyDecimate}
-                      />
-                    ))}
-                  </group>
-                </Stage>
+                {/* Direct lighting – replaces Stage to avoid unintended centering */}
+                <ambientLight intensity={0.6} />
+                <directionalLight position={[80, 120, 80]} intensity={0.6} castShadow shadow-bias={-0.0005} />
+                <directionalLight position={[-60, -60, 80]} intensity={0.2} />
+                <Environment preset="studio" />
+                <group
+                  ref={groupRef}
+                  scale={[globalTransform.scale, globalTransform.scale, globalTransform.scale]}
+                  position={[0, 0, 0]}
+                >
+                  {strokes.map((stroke, index) => (
+                    <MeshPart
+                      key={stroke.id}
+                      stroke={stroke}
+                      baseShapeId={baseShapeId}
+                      index={index}
+                      activeMaterial={activeMaterial}
+                      extrudeSettings={extrudeSettings}
+                      style={style}
+                      onMeshClick={handleMeshClick}
+                      smoothBrushActive={smoothBrushActive}
+                      smoothRadius={smoothRadius}
+                      smoothStrength={smoothStrength}
+                      showWireframe={showWireframe}
+                      subdivisionLevel={subdivisionLevel}
+                      retopologyDecimate={retopologyDecimate}
+                    />
+                  ))}
+                </group>
                 <OrbitControls
                   ref={controlsRef}
                   makeDefault
@@ -579,78 +610,177 @@ export const Viewer3D: React.FC<Viewer3DProps> = ({
                   maxPolarAngle={Math.PI}
                   enableDamping
                   dampingFactor={0.05}
-                  target={[0, 0, 0]}
                 />
-                <Environment preset="studio" />
-                <spotLight position={[100, 100, 100]} angle={0.15} penumbra={1} intensity={2} castShadow />
-                <pointLight position={[-100, -100, -100]} intensity={1} />
               </Canvas>
-
-              {/* Wireframe Overlay Close-up (Subtle) */}
-              {showWireframe && strokes.length > 0 && (
-                <div className="absolute bottom-6 right-6 w-32 h-32 rounded-xl border border-acid/30 bg-acid/5 backdrop-blur-md overflow-hidden pointer-events-none animate-in zoom-in-95 duration-300">
-                  <div className="absolute inset-0 opacity-20">
-                    <div className="w-full h-full" style={{ backgroundImage: 'radial-gradient(#D1FF00 1px, transparent 1px)', backgroundSize: '10px 10px' }} />
-                  </div>
-                  <div className="absolute inset-0 flex items-center justify-center">
-                    <div className="text-[8px] font-black text-acid uppercase tracking-tighter text-center px-2">
-                      Clean Topology<br />Verified
-                    </div>
-                  </div>
-                </div>
-              )}
             </div>
 
-            {/* Sliders Card (Overlaid inside static panel layout at the bottom) */}
-            {strokes.length > 0 && (
-              <div className="px-4 pb-4 w-full z-20">
-                <div className="flex flex-col gap-4 bg-[#0020D7] border-2 border-black rounded-[20px] p-4 shadow-md text-white">
-                  {/* Extrusion Depth Slider */}
-                  <div className="flex flex-col gap-1.5 w-full">
-                    <div
-                      style={{
-                        transform: `translate(${cfg.depthLabel.offsetX}px, ${cfg.depthLabel.offsetY}px) scale(${cfg.depthLabel.scale})`,
-                        transformOrigin: 'left center',
-                        display: 'inline-flex'
-                      }}
-                    >
-                      <img src={assetDepthLabel} className="h-3.5 w-auto self-start select-none" alt="Extrusion Depth" />
-                    </div>
-                    <input
-                      type="range"
-                      min="1"
-                      max="50"
-                      value={extrudeSettings.depth}
-                      onChange={(e) => setExtrudeSettings({ ...extrudeSettings, depth: parseInt(e.target.value) })}
-                      className="w-full h-[5px] bg-[#FF009C]/30 rounded-full appearance-none cursor-pointer accent-[#A7F417]"
-                      style={{ outline: 'none' }}
-                    />
-                  </div>
+            {/* Pop-Art Action Buttons (Top Left) */}
+            <div className="absolute top-4 left-4 z-20 flex items-center gap-2">
+              <div
+                style={{
+                  transform: `translate(${cfg.stlButton.offsetX}px, ${cfg.stlButton.offsetY}px) scale(${cfg.stlButton.scale})`,
+                  transformOrigin: 'center',
+                  display: 'inline-block'
+                }}
+              >
+                <button
+                  onClick={exportToSTL}
+                  disabled={strokes.length === 0}
+                  className="w-14 transition-transform active:scale-95 disabled:opacity-30 disabled:pointer-events-none cursor-pointer border-none bg-transparent p-0"
+                  title="Download STL Model"
+                >
+                  <img src={assetSTLButton} className="w-full h-auto pointer-events-none select-none" alt="STL" />
+                </button>
+              </div>
+              <div
+                style={{
+                  transform: `translate(${cfg.glbButton.offsetX}px, ${cfg.glbButton.offsetY}px) scale(${cfg.glbButton.scale})`,
+                  transformOrigin: 'center',
+                  display: 'inline-block'
+                }}
+              >
+                <button
+                  onClick={exportToGLB}
+                  disabled={strokes.length === 0}
+                  className="w-14 transition-transform active:scale-95 disabled:opacity-30 disabled:pointer-events-none cursor-pointer border-none bg-transparent p-0"
+                  title="Download GLB Model"
+                >
+                  <img src={assetGLBButton} className="w-full h-auto pointer-events-none select-none" alt="GLB" />
+                </button>
+              </div>
+              <div
+                style={{
+                  transform: `translate(${cfg.wireframeButton.offsetX}px, ${cfg.wireframeButton.offsetY}px) scale(${cfg.wireframeButton.scale})`,
+                  transformOrigin: 'center',
+                  display: 'inline-block'
+                }}
+              >
+                <button
+                  onClick={() => setShowWireframe(!showWireframe)}
+                  disabled={strokes.length === 0}
+                  className="w-8 transition-transform active:scale-95 disabled:opacity-30 disabled:pointer-events-none cursor-pointer border-none bg-transparent p-0"
+                  title="Toggle Wireframe Overlay"
+                >
+                  <img src={assetBoxIcon} className="w-full h-auto pointer-events-none select-none" alt="Wireframe" />
+                </button>
+              </div>
+            </div>
 
-                  {/* Detail Thickness Slider */}
-                  <div className="flex flex-col gap-1.5 w-full">
-                    <div
-                      style={{
-                        transform: `translate(${cfg.thicknessLabel.offsetX}px, ${cfg.thicknessLabel.offsetY}px) scale(${cfg.thicknessLabel.scale})`,
-                        transformOrigin: 'left center',
-                        display: 'inline-flex'
-                      }}
-                    >
-                      <img src={assetThicknessLabel} className="h-3.5 w-auto self-start select-none" alt="Detail Thickness" />
-                    </div>
-                    <input
-                      type="range"
-                      min="1"
-                      max="25"
-                      value={extrudeSettings.detailThickness}
-                      onChange={(e) => setExtrudeSettings({ ...extrudeSettings, detailThickness: parseInt(e.target.value) })}
-                      className="w-full h-[5px] bg-[#FF009C]/30 rounded-full appearance-none cursor-pointer accent-[#A7F417]"
-                      style={{ outline: 'none' }}
-                    />
+            {/* Control Status and Reset Camera (Top Right) */}
+            <div className="absolute top-4 right-4 z-20 flex items-center gap-2">
+              <button
+                onClick={handleReset}
+                className="w-8 h-8 flex items-center justify-center bg-white border-2 border-black rounded-lg hover:scale-110 active:scale-90 transition-transform shadow-md cursor-pointer"
+                title="Reset Camera"
+              >
+                <RotateCcw size={16} className="text-black" />
+              </button>
+              <div className={cn(
+                "flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[8px] font-black uppercase tracking-widest shadow-md border border-gray-100 bg-white/95 text-black select-none pointer-events-none",
+                smoothBrushActive ? "text-amber-600 border-amber-200" : "text-[#0020D7] border-blue-200"
+              )}>
+                <span className={cn("w-1.5 h-1.5 rounded-full", smoothBrushActive ? "bg-amber-500" : "bg-[#0020D7]")} />
+                <span>{smoothBrushActive ? "Sculpting" : "Painting"}</span>
+              </div>
+            </div>
+
+            {/* Waiting Prompt Overlay (z-10, blocks Canvas interaction when empty) */}
+            {strokes.length === 0 && (
+              <div className="absolute inset-0 bg-[#F9F9F9] flex flex-col items-center justify-center z-10 pointer-events-none select-none p-8">
+                <div
+                  style={{
+                    transform: `translate(${cfg.waitingPrompt.offsetX}px, ${cfg.waitingPrompt.offsetY}px) scale(${cfg.waitingPrompt.scale})`,
+                    transformOrigin: 'center'
+                  }}
+                >
+                  <img src={assetWaitingPrompt} className="w-72 h-auto object-contain pointer-events-none select-none" alt="Waiting for Input" />
+                </div>
+              </div>
+            )}
+
+            {/* Wireframe Overlay Close-up (Subtle, floating) */}
+            {showWireframe && strokes.length > 0 && (
+              <div className="absolute bottom-36 right-6 w-32 h-32 rounded-xl border border-acid/30 bg-acid/5 backdrop-blur-md overflow-hidden pointer-events-none z-20 animate-in zoom-in-95 duration-300">
+                <div className="absolute inset-0 opacity-20">
+                  <div className="w-full h-full" style={{ backgroundImage: 'radial-gradient(#D1FF00 1px, transparent 1px)', backgroundSize: '10px 10px' }} />
+                </div>
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <div className="text-[8px] font-black text-acid uppercase tracking-tighter text-center px-2">
+                    Clean Topology<br />Verified
                   </div>
                 </div>
               </div>
             )}
+          </div>
+        </div>
+      </div>
+
+      {/* Sliders Card - Below the 3D canvas, never overlapping it */}
+      <div 
+        className="w-full mt-3"
+        style={{
+          transform: cfg.slidersCard ? `translate(${cfg.slidersCard.offsetX}px, ${cfg.slidersCard.offsetY}px) scale(${cfg.slidersCard.scale})` : undefined,
+          transformOrigin: 'center'
+        }}
+      >
+        <div className="flex flex-col gap-4 bg-[#0020D7] border-2 border-black rounded-[20px] p-4 shadow-md text-white">
+          {/* Material Color Selector */}
+          <div className="flex flex-col gap-1.5 w-full pb-2 border-b border-white/10">
+            <div className="text-[9px] font-black uppercase tracking-widest text-[#A7F417] select-none">
+              Material Color
+            </div>
+            <div className="flex flex-nowrap gap-3 items-center">
+              {RECYCLED_MATERIALS.map((material) => (
+                <button
+                  key={material.id}
+                  onClick={() => onSelectMaterial?.(material)}
+                  className={cn(
+                    "w-8 h-8 rounded-full border-2 transition-all duration-150 hover:scale-110 shadow-sm relative cursor-pointer",
+                    activeMaterial.id === material.id
+                      ? "border-[#A7F417] scale-110 ring-2 ring-[#A7F417]/20"
+                      : "border-white/30 hover:border-white/80"
+                  )}
+                  style={{ backgroundColor: material.color }}
+                  title={material.name}
+                >
+                  {activeMaterial.id === material.id && (
+                    <span className="absolute inset-1 border border-[#0020D7] rounded-full pointer-events-none" />
+                  )}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Extrusion Depth Slider */}
+          <div className="flex flex-col gap-1.5 w-full">
+            <div className="flex items-center">
+              <img src={assetDepthLabel} className="h-3.5 w-auto select-none pointer-events-none" alt="Extrusion Depth" />
+            </div>
+            <input
+              type="range"
+              min="1"
+              max="50"
+              value={extrudeSettings.depth}
+              onChange={(e) => setExtrudeSettings({ ...extrudeSettings, depth: parseInt(e.target.value) })}
+              className="w-full h-[5px] bg-[#FF009C]/30 rounded-full appearance-none cursor-pointer accent-[#A7F417]"
+              style={{ outline: 'none' }}
+            />
+          </div>
+
+          {/* Detail Thickness Slider */}
+          <div className="flex flex-col gap-1.5 w-full">
+            <div className="flex items-center">
+              <img src={assetThicknessLabel} className="h-3.5 w-auto select-none pointer-events-none" alt="Detail Thickness" />
+            </div>
+            <input
+              type="range"
+              min="1"
+              max="25"
+              value={extrudeSettings.detailThickness}
+              onChange={(e) => setExtrudeSettings({ ...extrudeSettings, detailThickness: parseInt(e.target.value) })}
+              className="w-full h-[5px] bg-[#FF009C]/30 rounded-full appearance-none cursor-pointer accent-[#A7F417]"
+              style={{ outline: 'none' }}
+            />
           </div>
         </div>
       </div>

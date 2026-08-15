@@ -15,6 +15,7 @@ export default function LiquidImageReveal({
 }: LiquidImageRevealProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const [hasWebGL, setHasWebGL] = React.useState(true);
 
   useEffect(() => {
     if (!containerRef.current || !canvasRef.current) return;
@@ -32,11 +33,21 @@ export default function LiquidImageReveal({
     const camera = new THREE.OrthographicCamera(-0.5, 0.5, 0.5, -0.5, 0.1, 10);
     camera.position.z = 1;
 
-    const renderer = new THREE.WebGLRenderer({
-      canvas,
-      antialias: true,
-      alpha: true,
-    });
+    let renderer: THREE.WebGLRenderer;
+    try {
+      renderer = new THREE.WebGLRenderer({
+        canvas,
+        antialias: true,
+        alpha: true,
+      });
+      if (renderer.getContext().isContextLost()) {
+        throw new Error("WebGL context lost immediately during renderer construction.");
+      }
+    } catch (e) {
+      console.warn("LiquidImageReveal WebGL failed, falling back to static image", e);
+      setHasWebGL(false);
+      return;
+    }
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     renderer.setSize(width, height);
 
@@ -266,6 +277,15 @@ export default function LiquidImageReveal({
 
     resizeObserver.observe(container);
 
+    // Safe context lost event handling
+    const handleContextLost = (e: Event) => {
+      e.preventDefault();
+      console.warn("[LiquidImageReveal] WebGL context lost. Falling back to static image.");
+      setHasWebGL(false);
+    };
+
+    canvas.addEventListener("webglcontextlost", handleContextLost);
+
     // ── 7. CLEANUP ───────────────────────────────────────────────
     return () => {
       cancelAnimationFrame(animationId);
@@ -273,6 +293,7 @@ export default function LiquidImageReveal({
       window.removeEventListener("pointerenter", handlePointerEnter);
       window.removeEventListener("pointerleave", handlePointerLeave);
       window.removeEventListener("mouseleave", handlePointerLeave);
+      canvas.removeEventListener("webglcontextlost", handleContextLost);
       resizeObserver.disconnect();
       
       geometry.dispose();
@@ -288,9 +309,11 @@ export default function LiquidImageReveal({
       ref={containerRef}
       className={cn("w-full h-full relative touch-none select-none", className)}
     >
-      <canvas ref={canvasRef} className="absolute inset-0 w-full h-full block" />
-      {/* Fallback accessibility image */}
-      <img src={src} alt={alt} className="sr-only" />
+      {hasWebGL ? (
+        <canvas ref={canvasRef} className="absolute inset-0 w-full h-full block" />
+      ) : (
+        <img src={src} alt={alt} className="w-full h-full object-cover" />
+      )}
     </div>
   );
 }

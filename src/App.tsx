@@ -33,7 +33,7 @@ export default function App() {
   return (
     <PetProvider>
       <main className={`relative min-h-screen transition-colors duration-300 selection:bg-[#D1FF00] selection:text-black ${
-        activePage === "about" ? "bg-transparent" : "bg-[#F5F5F5]"
+        activePage === "about" ? "bg-transparent" : "bg-[#FFFFFF]"
       }`}>
         {/* Lớp Phủ Lưới Toàn Cục */}
         <div className="fixed inset-0 pointer-events-none z-[120] border-[20px] border-black/5"></div>

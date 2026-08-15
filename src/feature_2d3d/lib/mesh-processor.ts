@@ -17,6 +17,12 @@ export function refineGeometry(
 ): THREE.BufferGeometry {
   if (!geometry) return geometry;
 
+  // Nếu không kích hoạt làm mịn (subdivision) hoặc giảm lưới (decimation),
+  // trả về mesh gốc để giữ lại cấu trúc normals sắc nét và bề mặt phẳng hoàn hảo từ Three.js.
+  if (subdivisionLevel === 0 && decimateRatio === 0) {
+    return geometry;
+  }
+
   // 1. Clone to avoid modifying the cached/shared original geometry
   let processed = geometry.clone();
 

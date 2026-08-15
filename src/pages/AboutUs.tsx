@@ -1,7 +1,23 @@
-import React from "react";
+import React, { useState, useEffect, useRef } from "react";
 import LiquidImageReveal from "../components/LiquidImageReveal";
+import FluidTextEffect from "../components/FluidTextEffect";
 import PageContainer from "../components/PageContainer";
 import heroImg from "../assets/ảnh hiệu ứng/moi-truong-9-15431930 copy-Picsart-AiImageEnhancer copy.png";
+
+
+// Import looping frames for stop-motion GIF
+import gif1 from "../assets/ảnh gif/aa93b67b025be964025e0fb2aa0da72ca37a72de.jpeg";
+import gif2 from "../assets/ảnh gif/kaboompics_colored-microplastics-in-laboratory-dish-top-view-42019.jpg";
+import gif3 from "../assets/ảnh gif/kaboompics_microplastic-debris-scattered-on-white-background-42044.jpg";
+import gif4 from "../assets/ảnh gif/kaboompics_microplastic-dust-and-debris-abstract-pollution-background-42051.jpg";
+import gif5 from "../assets/ảnh gif/kaboompics_microplastic-particles-with-glove-laboratory-concept-42046.jpg";
+import gif6 from "../assets/ảnh gif/kaboompics_microplastics-and-gloved-hand-environmental-hazard-concept-42049.jpg";
+import gif7 from "../assets/ảnh gif/kaboompics_microplastics-and-plastic-waste-in-laboratory-glassware-top-view-42003.jpg";
+import gif8 from "../assets/ảnh gif/kaboompics_microplastics-texture-close-up-in-laboratory-glassware-42013.jpg";
+import gif9 from "../assets/ảnh gif/kaboompics_mixed-plastic-bottle-caps-and-waste-flat-lay-42032.jpg";
+import gif10 from "../assets/ảnh gif/kaboompics_plastic-bottles-arrangement-recycling-concept-flat-lay-42034.jpg";
+import gif11 from "../assets/ảnh gif/kaboompics_plastic-bottles-wrapped-in-transparent-bag-minimal-concept-42021.jpg";
+import gif12 from "../assets/ảnh gif/tải xuống (30).jpg";
 
 // Import SVG static assets for path-only graphics
 import asset13 from "../assets/info about/SVG/Asset 13.svg";
@@ -88,7 +104,7 @@ const RecreateSvg = ({ className, style }: { className?: string; style?: React.C
     <defs>
       <style>{`
         .recreate-cls-1 {
-          fill: #a6f317;
+          fill: #A7F417;
         }
         .recreate-cls-2 {
           letter-spacing: 0em;
@@ -104,7 +120,7 @@ const RecreateSvg = ({ className, style }: { className?: string; style?: React.C
           font-weight: 900;   
         }
         .recreate-cls-5 {
-          fill: #ff009b;
+          fill: #FF009E;
         }
         .recreate-cls-5, .recreate-cls-6 {
           font-size: 114.66px;
@@ -364,250 +380,521 @@ const NaturalLiquidImage = ({
   );
 };
 
-export default function AboutUs() {
-  return (
-    <div className="w-full bg-white relative flex flex-col">
-      {/* 1. Desktop Main Section — Asset15 defines height, photo is overlay on top of Asset15 */}
-      <div className="hidden lg:block w-full relative">
+const GIF_IMAGES = [
+  gif1, gif2, gif3, gif4, gif5, gif6, gif7, gif8, gif9, gif10, gif11, gif12
+];
 
-        {/* z=10 — Asset 15 SVG: in-flow background shape defines height */}
+// Per-letter background colors (6 letters in RELIFE)
+const LETTER_COLORS = [
+  "#0020D7", // R – primary brand blue
+  "#FF009E", // E – hot pink
+  "#A7F417", // L – acid green
+  "#FFD700", // I – golden yellow
+  "#FF5500", // F – vibrant orange
+  "#00B4D8", // E – cyan
+];
+
+const LETTERS = ["R", "E", "L", "I", "F", "E"];
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// 🎛️  KHOẢNG CÁCH CHỮ VỚI CẠNH ĐỈNH Ô TRẮNG
+//     Tăng số → chữ xa cạnh trên hơn (padding trên lớn hơn)
+//     Giảm số / 0 → chữ sát cạnh trên
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+const LETTER_TOP_PADDING = 80; // ← ĐỔI SỐ NÀY (px) 
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// 🎛️  TỐC ĐỘ CUỘN CHỮ (SCROLL MOTION SPEED)
+//     Số này là số pixel cần cuộn chuột để hoàn thành xếp chữ RELIFE.
+//     GIẢM SỐ → chữ chạy NHANH HƠN (ví dụ: 400, 500)
+//     TĂNG SỐ → chữ chạy CHẬM HƠN (ví dụ: 1000, 1200)
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+const HERO_SCROLL_DURATION = 3000; // ← ĐỔI SỐ NÀY để chỉnh tốc độ cuộn chữ (px) 
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// 🎛️  KÍCH THƯỚC KHUNG DƯỚI PHẦN RELIFE (GIF BANNER HEIGHT)
+//     Tăng số → khung ảnh/gif cao hơn
+//     Giảm số → khung ảnh/gif thấp hơn
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+const DESKTOP_GIF_HEIGHT = 700; // ← Chiều cao cho máy tính (px)
+const MOBILE_GIF_HEIGHT = 280;  // ← Chiều cao cho điện thoại (px)
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// 🎛️  KÍCH THƯỚC CHỮ "RELIFE"
+//     Tăng số → chữ to hơn
+//     Giảm số → chữ nhỏ hơn
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+const DESKTOP_LETTER_FONT_SIZE = 380; // ← Kích thước chữ tối đa trên máy tính (px)
+const MOBILE_LETTER_FONT_SIZE = 32;   // ← Kích thước chữ tối thiểu trên điện thoại (px)
+const RESPONSIVE_LETTER_SCALE = 11;   // ← Tỷ lệ co giãn theo màn hình (% viewport width, mặc định: 11vw)
+
+
+
+interface AboutHeroProps {
+  scrollProgress: number;
+  layoutSizes: {
+    slideDistance: number;
+    letterHeight: number;
+    gifHeight: number;
+    metaHeight: number;
+  };
+  maxScroll: number;
+  containerRef: React.RefObject<HTMLDivElement | null>;
+  gifRef: React.RefObject<HTMLDivElement | null>;
+  metaRef: React.RefObject<HTMLDivElement | null>;
+  letterRef: React.RefObject<HTMLDivElement | null>;
+}
+
+const AboutHeroSection: React.FC<AboutHeroProps> = ({
+  scrollProgress = 0,
+  layoutSizes = {
+    slideDistance: 450,
+    letterHeight: 180,
+    gifHeight: 400,
+    metaHeight: 50,
+  },
+  maxScroll = 800,
+  containerRef,
+  gifRef,
+  metaRef,
+  letterRef,
+}) => {
+  const [currentFrame, setCurrentFrame] = useState(0);
+  const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
+
+  // Frame loop for stop-motion GIF simulation
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentFrame((prev) => (prev + 1) % GIF_IMAGES.length);
+    }, 250);
+    return () => clearInterval(interval);
+  }, []);
+
+  const totalLetters = LETTERS.length;
+  const { slideDistance, letterHeight, gifHeight, metaHeight } = layoutSizes;
+
+  return (
+    <div
+      ref={containerRef}
+      className="w-full relative bg-white select-none z-20"
+      style={{ height: `${slideDistance + letterHeight + maxScroll}px` }} // Dynamic height ensures next content section follows seamlessly without gaps
+    >
+      {/* Sticky layout container pinned below fixed navbar (top: 80px) */}
+      <div
+        className="sticky top-20 w-full flex flex-col items-center bg-transparent px-4 md:px-12 lg:px-16 pt-4 z-10"
+        style={{ height: `${slideDistance + letterHeight}px`, overflow: "visible" }}
+      >
+        {/* 1. Large Media Loop Banner (z-10) */}
         <div
-          className="relative mx-auto"
-          style={{
-            zIndex: 10,
-            top: `${ASSET15_TOP}px`,
-            width: `${ASSET15_SIZE * ASSET15_SCALE}%`
-          }}
+          ref={gifRef}
+          className="w-full rounded-sm overflow-hidden border border-[#0020D7]/10 relative z-10 shadow-sm bg-gray-50 flex-shrink-0"
+          style={{ height: `${gifHeight}px` }}
         >
-          <Asset15Svg />
+          <img
+            src={GIF_IMAGES[currentFrame]}
+            alt="Looping dynamic studio media"
+            className="w-full h-full object-cover select-none pointer-events-none"
+          />
         </div>
 
-        {/* z=20 — Hero Photo: sits on top of Asset15, 100% intact with alpha channel */}
-        <NaturalLiquidImage
-          src={heroImg}
-          alt="Plastic sorting emergency"
-          top={HERO_PHOTO_TOP}
-          size={HERO_PHOTO_SIZE * HERO_PHOTO_SCALE}
-          zIndex={20}
-        />
+        {/* 2. Metadata Information Row (z-10) */}
+        <div
+          ref={metaRef}
+          className="w-full flex justify-between items-center text-[10px] md:text-xs font-mono tracking-widest text-[#0020D7] uppercase relative z-10 bg-white flex-shrink-0"
+          style={{ height: `${metaHeight}px` }}
+        >
+          <span>RE-LIFE CIRCULAR STUDIO</span>
+          <span className="hidden md:inline">DANANG, VIETNAM</span>
+          <span className="hidden sm:inline">SAIGON, VIETNAM</span>
+          <span>WORKING WORLDWIDE</span>
+        </div>
 
-        {/* z=30 — Text Overlays: on top of everything */}
-        <div className="absolute inset-0 w-full h-full pointer-events-none" style={{ zIndex: 30 }}>
-          {/* Asset 18: _RETHINK */}
-          <div
-            className="absolute select-none pointer-events-none"
-            style={{ left: `${ASSET18_LEFT}%`, top: `${ASSET18_TOP}%` }}
-          >
-            <RethinkSvg style={{ width: `${ASSET18_SIZE * ASSET18_SCALE}vw`, height: "auto" }} />
-          </div>
+        {/* 3. Staggered sliding blocks containing the letters (z-20) */}
+        <div
+          ref={letterRef}
+          className="w-full relative z-20 flex items-start flex-shrink-0"
+          style={{ height: `${letterHeight}px`, overflow: "visible" }}
+        >
+          {LETTERS.map((letter, i) => {
+            // Stagger calculation left-to-right (R -> E -> L -> I -> F -> E)
+            const start = (i / totalLetters) * 0.45;
+            const end = start + 0.45;
+            const rawT = Math.max(0, Math.min(1, (scrollProgress - start) / (end - start)));
+            // Cubic easeOut for elegant mechanical slide feel
+            const t = 1 - Math.pow(1 - rawT, 3);
 
-          {/* Asset 19: PLASTIC */}
-          <div
-            className="absolute select-none pointer-events-none"
-            style={{ left: `${ASSET19_LEFT}%`, top: `${ASSET19_TOP}%` }}
-          >
-            <PlasticSvg style={{ width: `${ASSET19_SIZE * ASSET19_SCALE}vw`, height: "auto" }} />
-          </div>
+            // Translate starting from 0px (aligned on load) up to -slideDistance (covering GIF at top)
+            const translateY = -t * slideDistance;
 
-          {/* Asset 20: recreate */}
-          <div
-            className="absolute -translate-x-1/2 -translate-y-1/2 select-none pointer-events-none"
-            style={{ left: `${ASSET20_LEFT}%`, top: `${ASSET20_TOP}%` }}
-          >
-            <RecreateSvg style={{ width: `${ASSET20_SIZE * ASSET20_SCALE}vw`, height: "auto" }} />
-          </div>
-
-          {/* Asset 17: THE */}
-          <div
-            className="absolute select-none pointer-events-none"
-            style={{ right: `${ASSET17_RIGHT}%`, top: `${ASSET17_TOP}%` }}
-          >
-            <TheSvg style={{ width: `${ASSET17_SIZE * ASSET17_SCALE}vw`, height: "auto" }} />
-          </div>
-
-          {/* Asset 16: _FUTURE */}
-          <div
-            className="absolute select-none pointer-events-none"
-            style={{ right: `${ASSET16_RIGHT}%`, top: `${ASSET16_TOP}%` }}
-          >
-            <FutureSvg style={{ width: `${ASSET16_SIZE * ASSET16_SCALE}vw`, height: "auto" }} />
-          </div>
-
-          {/* Asset 23: Vietnam's 1.8-Million-Ton */}
-          <div
-            className="absolute select-none pointer-events-none"
-            style={{ left: `${ASSET23_LEFT}%`, bottom: `${ASSET23_BOTTOM}%` }}
-          >
-            <img
-              src={asset23}
-              alt="Vietnam's 1.8-Million-Ton"
-              className="block"
-              style={{ width: `${ASSET23_SIZE * ASSET23_SCALE}vw`, height: "auto" }}
-            />
-          </div>
-
-          {/* Asset 21: Plastic Waste Emergency */}
-          <div
-            className="absolute select-none pointer-events-none"
-            style={{ left: `${ASSET21_LEFT}%`, bottom: `${ASSET21_BOTTOM}%` }}
-          >
-            <PlasticEmergencySvg style={{ width: `${ASSET21_SIZE * ASSET21_SCALE}vw`, height: "auto" }} />
-          </div>
-
-          {/* Asset 22: Description */}
-          <div
-            className="absolute select-none pointer-events-none"
-            style={{ right: `${ASSET22_RIGHT}%`, bottom: `${ASSET22_BOTTOM}%` }}
-          >
-            <DescriptionSvg style={{ width: `${ASSET22_SIZE * ASSET22_SCALE}vw`, height: "auto" }} />
-          </div>
-
-          {/* Asset 25: Floating Decoration Asset */}
-          <div
-            className="absolute select-none pointer-events-none animate-float"
-            style={{ left: `${ASSET25_LEFT}%`, top: `${ASSET25_TOP}%` }}
-          >
-            <img
-              src={asset25}
-              alt="Floating Decoration"
-              className="block"
-              style={{ width: `${ASSET25_SIZE * ASSET25_SCALE}vw`, height: "auto" }}
-            />
-          </div>
-
-          {/* Asset 81: Second Floating Decoration Asset */}
-          <div
-            className="absolute select-none pointer-events-none animate-float"
-            style={{ left: `${ASSET81_LEFT}%`, top: `${ASSET81_TOP}%` }}
-          >
-            <img
-              src={asset81}
-              alt="Floating Decoration 2"
-              className="block"
-              style={{
-                width: `${ASSET81_SIZE * ASSET81_SCALE}vw`,
-                height: "auto",
-                transform: `rotate(${ASSET81_ROTATION}deg)`
-              }}
-            />
-          </div>
+            return (
+              <div
+                key={`block-${i}`}
+                className="flex-1 flex flex-col justify-start bg-white relative"
+                style={{
+                  height: `${slideDistance + letterHeight}px`,
+                  transform: `translateY(${translateY}px)`,
+                  willChange: "transform",
+                  zIndex: hoveredIndex === i ? 50 : 1,
+                }}
+                onMouseEnter={() => setHoveredIndex(i)}
+                onMouseLeave={() => setHoveredIndex(null)}
+              >
+                {/* Letter Container at the top of the sliding white block */}
+                <div
+                  className="flex items-center justify-center w-full"
+                  style={{ height: `${letterHeight}px`, paddingTop: `${LETTER_TOP_PADDING}px` }}
+                >
+                  <FluidTextEffect
+                    text={letter}
+                    fontSize={`clamp(${MOBILE_LETTER_FONT_SIZE}px, ${RESPONSIVE_LETTER_SCALE}vw, ${DESKTOP_LETTER_FONT_SIZE}px)`}
+                    textColor="#0020D7"
+                    letterHeight={letterHeight}
+                    fontFamily="Malinton"
+                    fontWeight="900"
+                  />
+                </div>
+              </div>
+            );
+          })}
         </div>
       </div>
+    </div>
+  );
+};
 
 
-      {/* 2. Mobile / Tablet Viewport Layout (lg-hidden) - naturally scrollable globally */}
-      <PageContainer size="full" className="lg:hidden w-full relative z-10 flex flex-col items-center justify-start pt-20 pb-12 bg-transparent">
-        {/* Mobile Dripping Wave Background Shape */}
-        <div className="absolute inset-0 w-full h-full z-0 pointer-events-none">
-          <Asset15Svg />
-        </div>
+export default function AboutUs() {
+  const [scrollProgress, setScrollProgress] = useState(0);
+  const [layoutSizes, setLayoutSizes] = useState({
+    slideDistance: 450,
+    letterHeight: 180,
+    gifHeight: 400,
+    metaHeight: 50,
+  });
 
+  const containerRef = useRef<HTMLDivElement>(null);
+  const gifRef = useRef<HTMLDivElement>(null);
+  const metaRef = useRef<HTMLDivElement>(null);
+  const letterRef = useRef<HTMLDivElement>(null);
 
-        {/* Mobile Content Wrapper */}
-        <div className="relative z-10 w-full flex flex-col items-center justify-start">
-          {/* Top Header Section (stacked bg elements) */}
-          <div className="w-full flex flex-col items-center gap-4 mt-2 mb-6 select-none">
-            <div className="flex flex-col items-center">
-              <RethinkSvg className="w-[160px] h-auto" />
-              <PlasticSvg className="w-[260px] h-auto mt-1" />
+  const maxScroll = HERO_SCROLL_DURATION; // Scroll range to complete letter slide-up cover
+
+  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  // 🎛️  KHOẢNG CÁCH PHẦN NỘI DUNG SAU RELIFE
+  //     Tăng số → content lại gần RELIFE hơn (dịch lên)
+  //     Giảm số → content xa RELIFE hơn (dịch xuống)
+  //     Giá trị mặc định hợp lý: 0  (không offset thêm)
+  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  const CONTENT_GAP_OFFSET = 0; // ← ĐỔI SỐ NÀY (px) 
+
+  // Responsive sizes
+  useEffect(() => {
+    const updateSizes = () => {
+      const isDesktop = window.innerWidth >= 1024;
+      const gifH = isDesktop ? DESKTOP_GIF_HEIGHT : MOBILE_GIF_HEIGHT;
+      const metaH = 50;
+      const letterH = isDesktop ? 380 : 120;
+      setLayoutSizes({
+        slideDistance: gifH + metaH + CONTENT_GAP_OFFSET,
+        letterHeight: letterH,
+        gifHeight: gifH,
+        metaHeight: metaH,
+      });
+    };
+
+    updateSizes();
+    // Add small delay to ensure rendering is complete
+    const timeout = setTimeout(updateSizes, 100);
+
+    window.addEventListener("resize", updateSizes);
+    return () => {
+      clearTimeout(timeout);
+      window.removeEventListener("resize", updateSizes);
+    };
+  }, []);
+
+  // Track window scroll progress relative to the hero section
+  useEffect(() => {
+    const handleScroll = () => {
+      if (!containerRef.current) return;
+      const rect = containerRef.current.getBoundingClientRect();
+      const scrollTop = -rect.top;
+      // Phase 1: RELIFE letter slide-up (0 → maxScroll)
+      const progress = Math.max(0, Math.min(1, scrollTop / maxScroll));
+      setScrollProgress(progress);
+    };
+
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    handleScroll();
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, [maxScroll]);
+
+  return (
+    <div className="w-full bg-white relative flex flex-col">
+      {/* 0. NEW About Hero Section */}
+      <AboutHeroSection
+        scrollProgress={scrollProgress}
+        layoutSizes={layoutSizes}
+        maxScroll={maxScroll}
+        containerRef={containerRef}
+        gifRef={gifRef}
+        metaRef={metaRef}
+        letterRef={letterRef}
+      />
+
+      {/* Wrapper for the rest of the content, translated up dynamically during hero slide */}
+      <div
+        style={{
+          transform: `translateY(${-scrollProgress * layoutSizes.slideDistance}px)`,
+          willChange: "transform",
+          position: "relative",
+          zIndex: 40,
+        }}
+        className="w-full bg-white"
+      >
+        {/* 1. Desktop Main Section — Asset15 defines height, photo is overlay on top of Asset15 */}
+        <div className="hidden lg:block w-full relative">
+
+          {/* z=10 — Asset 15 SVG: in-flow background shape defines height */}
+          <div
+            className="relative mx-auto"
+            style={{
+              zIndex: 10,
+              top: `${ASSET15_TOP}px`,
+              width: `${ASSET15_SIZE * ASSET15_SCALE}%`
+            }}
+          >
+            <Asset15Svg />
+          </div>
+
+          {/* z=20 — Hero Photo: sits on top of Asset15, 100% intact with alpha channel */}
+          <NaturalLiquidImage
+            src={heroImg}
+            alt="Plastic sorting emergency"
+            top={HERO_PHOTO_TOP}
+            size={HERO_PHOTO_SIZE * HERO_PHOTO_SCALE}
+            zIndex={20}
+          />
+
+          {/* z=30 — Text Overlays: on top of everything */}
+          <div className="absolute inset-0 w-full h-full pointer-events-none" style={{ zIndex: 30 }}>
+            {/* Asset 18: _RETHINK */}
+            <div
+              className="absolute select-none pointer-events-none"
+              style={{ left: `${ASSET18_LEFT}%`, top: `${ASSET18_TOP}%` }}
+            >
+              <RethinkSvg style={{ width: `${ASSET18_SIZE * ASSET18_SCALE}vw`, height: "auto" }} />
             </div>
 
-            <RecreateSvg className="w-[220px] h-auto" />
-
-            <div className="flex flex-col items-center">
-              <TheSvg className="w-[180px] h-auto" />
-              <FutureSvg className="w-[160px] h-auto mt-1" />
+            {/* Asset 19: PLASTIC */}
+            <div
+              className="absolute select-none pointer-events-none"
+              style={{ left: `${ASSET19_LEFT}%`, top: `${ASSET19_TOP}%` }}
+            >
+              <PlasticSvg style={{ width: `${ASSET19_SIZE * ASSET19_SCALE}vw`, height: "auto" }} />
             </div>
-          </div>
 
-          {/* Arched Photo (Center) */}
-          <div className="w-full max-w-[260px] h-[320px] rounded-t-full overflow-hidden bg-transparent mb-6">
-            <LiquidImageReveal
-              src={heroImg}
-              alt="Plastic sorting emergency"
-              className="w-full h-full"
-            />
-          </div>
+            {/* Asset 20: recreate */}
+            <div
+              className="absolute -translate-x-1/2 -translate-y-1/2 select-none pointer-events-none"
+              style={{ left: `${ASSET20_LEFT}%`, top: `${ASSET20_TOP}%` }}
+            >
+              <RecreateSvg style={{ width: `${ASSET20_SIZE * ASSET20_SCALE}vw`, height: "auto" }} />
+            </div>
 
-          {/* Asset 25: Floating Decoration (Mobile) */}
-          <div className="w-[100px] h-auto mb-6 animate-float select-none pointer-events-none">
-            <img
-              src={asset25}
-              alt="Floating Decoration"
-              className="w-full h-auto block"
-            />
-          </div>
+            {/* Asset 17: THE */}
+            <div
+              className="absolute select-none pointer-events-none"
+              style={{ right: `${ASSET17_RIGHT}%`, top: `${ASSET17_TOP}%` }}
+            >
+              <TheSvg style={{ width: `${ASSET17_SIZE * ASSET17_SCALE}vw`, height: "auto" }} />
+            </div>
 
-          {/* Asset 81: Floating Decoration 2 (Mobile) */}
-          <div className="w-[100px] h-auto mb-6 animate-float select-none pointer-events-none">
-            <img
-              src={asset81}
-              alt="Floating Decoration 2"
-              className="w-full h-auto block"
-              style={{
-                transform: `rotate(${ASSET81_ROTATION}deg)`
-              }}
-            />
-          </div>
+            {/* Asset 16: _FUTURE */}
+            <div
+              className="absolute select-none pointer-events-none"
+              style={{ right: `${ASSET16_RIGHT}%`, top: `${ASSET16_TOP}%` }}
+            >
+              <FutureSvg style={{ width: `${ASSET16_SIZE * ASSET16_SCALE}vw`, height: "auto" }} />
+            </div>
 
-          {/* Text Section (Bottom) */}
-          <div className="w-full max-w-[360px] flex flex-col items-center text-center gap-4 select-none">
-            <div className="flex flex-col items-center">
+            {/* Asset 23: Vietnam's 1.8-Million-Ton */}
+            <div
+              className="absolute select-none pointer-events-none"
+              style={{ left: `${ASSET23_LEFT}%`, bottom: `${ASSET23_BOTTOM}%` }}
+            >
               <img
                 src={asset23}
                 alt="Vietnam's 1.8-Million-Ton"
-                className="w-[200px] h-auto block"
+                className="block"
+                style={{ width: `${ASSET23_SIZE * ASSET23_SCALE}vw`, height: "auto" }}
               />
-              <PlasticEmergencySvg className="w-[240px] h-auto mt-2" />
             </div>
 
-            <DescriptionSvg className="w-[240px] h-auto mx-auto" />
+            {/* Asset 21: Plastic Waste Emergency */}
+            <div
+              className="absolute select-none pointer-events-none"
+              style={{ left: `${ASSET21_LEFT}%`, bottom: `${ASSET21_BOTTOM}%` }}
+            >
+              <PlasticEmergencySvg style={{ width: `${ASSET21_SIZE * ASSET21_SCALE}vw`, height: "auto" }} />
+            </div>
+
+            {/* Asset 22: Description */}
+            <div
+              className="absolute select-none pointer-events-none"
+              style={{ right: `${ASSET22_RIGHT}%`, bottom: `${ASSET22_BOTTOM}%` }}
+            >
+              <DescriptionSvg style={{ width: `${ASSET22_SIZE * ASSET22_SCALE}vw`, height: "auto" }} />
+            </div>
+
+            {/* Asset 25: Floating Decoration Asset */}
+            <div
+              className="absolute select-none pointer-events-none animate-float"
+              style={{ left: `${ASSET25_LEFT}%`, top: `${ASSET25_TOP}%` }}
+            >
+              <img
+                src={asset25}
+                alt="Floating Decoration"
+                className="block"
+                style={{ width: `${ASSET25_SIZE * ASSET25_SCALE}vw`, height: "auto" }}
+              />
+            </div>
+
+            {/* Asset 81: Second Floating Decoration Asset */}
+            <div
+              className="absolute select-none pointer-events-none animate-float"
+              style={{ left: `${ASSET81_LEFT}%`, top: `${ASSET81_TOP}%` }}
+            >
+              <img
+                src={asset81}
+                alt="Floating Decoration 2"
+                className="block"
+                style={{
+                  width: `${ASSET81_SIZE * ASSET81_SCALE}vw`,
+                  height: "auto",
+                  transform: `rotate(${ASSET81_ROTATION}deg)`
+                }}
+              />
+            </div>
           </div>
         </div>
-      </PageContainer>
 
-      {/* ============================================================
+
+        {/* 2. Mobile / Tablet Viewport Layout (lg-hidden) - naturally scrollable globally */}
+        <PageContainer size="full" className="lg:hidden w-full relative z-10 flex flex-col items-center justify-start pt-8 pb-12 bg-transparent">
+          {/* Mobile Dripping Wave Background Shape */}
+          <div className="absolute inset-0 w-full h-full z-0 pointer-events-none">
+            <Asset15Svg />
+          </div>
+
+
+          {/* Mobile Content Wrapper */}
+          <div className="relative z-10 w-full flex flex-col items-center justify-start">
+            {/* Top Header Section (stacked bg elements) */}
+            <div className="w-full flex flex-col items-center gap-4 mt-2 mb-6 select-none">
+              <div className="flex flex-col items-center">
+                <RethinkSvg className="w-[160px] h-auto" />
+                <PlasticSvg className="w-[260px] h-auto mt-1" />
+              </div>
+
+              <RecreateSvg className="w-[220px] h-auto" />
+
+              <div className="flex flex-col items-center">
+                <TheSvg className="w-[180px] h-auto" />
+                <FutureSvg className="w-[160px] h-auto mt-1" />
+              </div>
+            </div>
+
+            {/* Arched Photo (Center) */}
+            <div className="w-full max-w-[260px] h-[320px] rounded-t-full overflow-hidden bg-transparent mb-6">
+              <LiquidImageReveal
+                src={heroImg}
+                alt="Plastic sorting emergency"
+                className="w-full h-full"
+              />
+            </div>
+
+            {/* Asset 25: Floating Decoration (Mobile) */}
+            <div className="w-[100px] h-auto mb-6 animate-float select-none pointer-events-none">
+              <img
+                src={asset25}
+                alt="Floating Decoration"
+                className="w-full h-auto block"
+              />
+            </div>
+
+            {/* Asset 81: Floating Decoration 2 (Mobile) */}
+            <div className="w-[100px] h-auto mb-6 animate-float select-none pointer-events-none">
+              <img
+                src={asset81}
+                alt="Floating Decoration 2"
+                className="w-full h-auto block"
+                style={{
+                  transform: `rotate(${ASSET81_ROTATION}deg)`
+                }}
+              />
+            </div>
+
+            {/* Text Section (Bottom) */}
+            <div className="w-full max-w-[360px] flex flex-col items-center text-center gap-4 select-none">
+              <div className="flex flex-col items-center">
+                <img
+                  src={asset23}
+                  alt="Vietnam's 1.8-Million-Ton"
+                  className="w-[200px] h-auto block"
+                />
+                <PlasticEmergencySvg className="w-[240px] h-auto mt-2" />
+              </div>
+
+              <DescriptionSvg className="w-[240px] h-auto mx-auto" />
+            </div>
+          </div>
+        </PageContainer>
+
+        {/* ============================================================
           CONTENT SECTIONS — thêm nội dung mới vào đây bên dưới
           ============================================================ */}
 
-      {/* SECTION 2 — Placeholder: thêm nội dung tại đây */}
-      <PageContainer
-        as="section"
-        id="about-section-2"
-        size="wide"
-        className="min-h-screen bg-white flex flex-col items-center justify-center py-24"
-      >
-        {/* TODO: thêm content section 2 */}
-        <div className="w-full h-full flex items-center justify-center opacity-10">
-          <span className="text-black font-mono text-sm tracking-widest">SECTION 2 — DESIGN HERE</span>
-        </div>
-      </PageContainer>
+        {/* SECTION 2 — Placeholder: thêm nội dung tại đây */}
+        <PageContainer
+          as="section"
+          id="about-section-2"
+          size="wide"
+          className="min-h-screen bg-white flex flex-col items-center justify-center py-24"
+        >
+          {/* TODO: thêm content section 2 */}
+          <div className="w-full h-full flex items-center justify-center opacity-10">
+            <span className="text-black font-mono text-sm tracking-widest">SECTION 2 — DESIGN HERE</span>
+          </div>
+        </PageContainer>
 
-      {/* SECTION 3 — Placeholder: thêm nội dung tại đây */}
-      <PageContainer
-        as="section"
-        id="about-section-3"
-        size="wide"
-        className="min-h-screen bg-white flex flex-col items-center justify-center py-24"
-      >
-        {/* TODO: thêm content section 3 */}
-        <div className="w-full h-full flex items-center justify-center opacity-10">
-          <span className="text-black font-mono text-sm tracking-widest">SECTION 3 — DESIGN HERE</span>
-        </div>
-      </PageContainer>
+        {/* SECTION 3 — Placeholder: thêm nội dung tại đây */}
+        <PageContainer
+          as="section"
+          id="about-section-3"
+          size="wide"
+          className="min-h-screen bg-white flex flex-col items-center justify-center py-24"
+        >
+          {/* TODO: thêm content section 3 */}
+          <div className="w-full h-full flex items-center justify-center opacity-10">
+            <span className="text-black font-mono text-sm tracking-widest">SECTION 3 — DESIGN HERE</span>
+          </div>
+        </PageContainer>
 
-      {/* SECTION 4 — Placeholder: thêm nội dung tại đây */}
-      <PageContainer
-        as="section"
-        id="about-section-4"
-        size="wide"
-        className="min-h-screen bg-white flex flex-col items-center justify-center py-24"
-      >
-        {/* TODO: thêm content section 4 */}
-        <div className="w-full h-full flex items-center justify-center opacity-10">
-          <span className="text-black font-mono text-sm tracking-widest">SECTION 4 — DESIGN HERE</span>
-        </div>
-      </PageContainer>
+        {/* SECTION 4 — Placeholder: thêm nội dung tại đây */}
+        <PageContainer
+          as="section"
+          id="about-section-4"
+          size="wide"
+          className="min-h-screen bg-white flex flex-col items-center justify-center py-24"
+        >
+          {/* TODO: thêm content section 4 */}
+          <div className="w-full h-full flex items-center justify-center opacity-10">
+            <span className="text-black font-mono text-sm tracking-widest">SECTION 4 — DESIGN HERE</span>
+          </div>
+        </PageContainer>
+
+      </div>
 
       {/* Watermark at the bottom right */}
       <div className="fixed bottom-4 right-4 opacity-30 pointer-events-none hidden md:block z-50">

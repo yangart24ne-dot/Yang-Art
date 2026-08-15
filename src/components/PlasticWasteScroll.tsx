@@ -59,7 +59,7 @@ const PARTICLE_SIZE = 0.3;
 const BOTTLE_COUNT = 180;
 // ------------------------------------------------------------------------------------
 
-function Microplastics() {
+function Microplastics({ scrollProgress }: { scrollProgress: number }) {
   const pointsRef = useRef<THREE.Points>(null);
 
   const [positions, colors, sizes] = useMemo(() => {
@@ -285,7 +285,7 @@ function FloatingBottles({ scrollProgress }: { scrollProgress: number }) {
     const intro = Math.min(1, t / 4.0);
     // Hiệu ứng easing cubic ease-out bay vào nhanh rồi chậm lại mượt mà
     const ease = 1 - Math.pow(1 - intro, 3);
-
+    
     groupRef.current.children.forEach((child, i) => {
       const item = items[i];
       const phase = item.phase + i * 0.13;
@@ -315,6 +315,14 @@ function FloatingBottles({ scrollProgress }: { scrollProgress: number }) {
         baseRot[1] + t * item.rotationSpeed[1] * 100 * spin,
         baseRot[2] + t * item.rotationSpeed[2] * 100 * spin
       );
+
+      child.traverse((childMesh: any) => {
+        if (childMesh.isMesh && childMesh.material) {
+          const baseOpacity = item.materialType === 'PET' ? 1.0 : 0.9;
+          childMesh.material.opacity = baseOpacity;
+          childMesh.material.transparent = true;
+        }
+      });
     });
   });
 
@@ -501,16 +509,111 @@ function CinematicLights({ scrollProgress }: { scrollProgress: number }) {
   );
 }
 
+function HeroBottle({ scrollProgress, model }: { scrollProgress: number; model: any }) {
+  const meshRef = useRef<THREE.Group>(null);
+  
+  // Calculate interpolation
+  const progress = Math.min(1, Math.max(0, scrollProgress / 0.15)); // 0 to 1 over scrollProgress 0 -> 0.15
+  const opacity = 1 - progress;
+  // Make the scale start around base scale * 0.75 and grow significantly to fly past camera
+  const scaleVal = (BOTTLE_BASE_SCALE * 0.75) * (1 + progress * 4.5); 
+  const zPos = 4.8 - progress * 9.5; // starts at Z=4.8. Camera Z is around 8.0 -> 1.25. At progress=1, camera is past the bottle
+  
+  const item = useMemo(() => ({
+    color: "#00D1FF", // Electric Blue / Cyan
+    materialType: 'PET',
+    speed: 0.5,
+  }), []);
+
+  const scene = useMemo(() => {
+    if (!model || !model.scene) return new THREE.Group();
+    const cloned = model.scene.clone();
+
+    // Standardize size
+    const box = new THREE.Box3().setFromObject(cloned);
+    const size = new THREE.Vector3();
+    box.getSize(size);
+    const maxDim = Math.max(size.x, size.y, size.z);
+    let scaleFactor = 5;
+    if (maxDim > 0 && maxDim !== Infinity) {
+      scaleFactor = 1.2 / maxDim;
+      cloned.scale.set(scaleFactor, scaleFactor, scaleFactor);
+    }
+    const center = new THREE.Vector3();
+    box.getCenter(center);
+    if (maxDim > 0 && maxDim !== Infinity) {
+      cloned.position.set(-center.x * scaleFactor, -center.y * scaleFactor, -center.z * scaleFactor);
+    }
+
+    cloned.traverse((child: any) => {
+      if (child.isMesh) {
+        child.material = new THREE.MeshPhysicalMaterial({
+          color: new THREE.Color(item.color),
+          metalness: 0.1,
+          roughness: 0.05,
+          transmission: 0.95,
+          thickness: 0.8,
+          ior: 1.5,
+          transparent: true,
+          opacity: 1
+        });
+      }
+    });
+
+    const wrapper = new THREE.Group();
+    wrapper.add(cloned);
+    return wrapper;
+  }, [model]);
+
+  useFrame((state) => {
+    if (!meshRef.current) return;
+    const t = state.clock.getElapsedTime();
+    
+    // Slow float/spin on load
+    meshRef.current.position.set(
+      Math.sin(t * 0.5) * 0.15,
+      1 + Math.cos(t * 0.4) * 0.1,
+      zPos
+    );
+    
+    meshRef.current.rotation.set(
+      0.4 + Math.sin(t * 0.3) * 0.1,
+      t * 0.15 + progress * 3.5, // spin faster as we scroll/zoom
+      0.2 + Math.cos(t * 0.2) * 0.05
+    );
+
+    // Apply scale and opacity to the group
+    meshRef.current.scale.set(scaleVal, scaleVal, scaleVal);
+    
+    // Traverse meshes to update material opacity
+    meshRef.current.traverse((child: any) => {
+      if (child.isMesh && child.material) {
+        child.material.opacity = opacity;
+        child.material.transparent = true;
+      }
+    });
+  });
+
+  if (opacity <= 0) return null;
+
+  return (
+    <primitive object={scene} ref={meshRef} />
+  );
+}
+
 export default function PlasticWasteScroll({ scrollProgress = 0 }: { scrollProgress?: number }) {
+  const m0 = useGLTF(BOTTLE_URLS[0]);
+  const bgColorString = "#FFFFFF";
+
   return (
     <div className="fixed inset-0 z-0 bg-white">
       <Canvas dpr={[1, 2]} gl={{ antialias: true, alpha: true }}>
-        <fog attach="fog" args={["#FFFFFF", 30, 250]} />
+        <fog attach="fog" args={[bgColorString, 30, 250]} />
 
         <CinematicCamera scrollProgress={scrollProgress} />
         <CinematicLights scrollProgress={scrollProgress} />
 
-        <Microplastics />
+        <Microplastics scrollProgress={scrollProgress} />
         <React.Suspense fallback={null}>
           <FloatingBottles scrollProgress={scrollProgress} />
         </React.Suspense>
