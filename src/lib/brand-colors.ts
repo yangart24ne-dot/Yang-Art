@@ -1,6 +1,6 @@
 /**
  * ╔══════════════════════════════════════════════╗
- * ║   YANG STUDIO – Official Brand Color System  ║
+ * ║   RELIFE LAB – Official Brand Color System   ║
  * ╚══════════════════════════════════════════════╝
  *
  * Đây là nguồn duy nhất (single source of truth) cho tất cả màu sắc

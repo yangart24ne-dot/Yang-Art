@@ -60,8 +60,41 @@ export const SPIRAL_CONFIG = {
   bottleScaleBottomLeft: 1.1,  // Tỉ lệ chai nhựa góc dưới - trái
   bottleScaleBottomRight: 1.05,// Tỉ lệ chai nhựa góc dưới - phải
 
-  // 📡 6. CẤU HÌNH THANH CHỈ & THÔNG TIN Ô NHIỄM (INFO HUD CALLOUTS)
-  showInfoCallouts: true,      // true: Bật các thanh chỉ dẫn & hộp thông tin xung quanh
+  // 📡 6. CẤU HÌNH CÁC CỤM THÔNG TIN & THANH CHỈ DẪN (INFO HUD CALLOUTS CONFIG)
+  showInfoCallouts: true,      // true: Bật hiển thị các cụm thông tin | false: Ẩn
+
+  // 🔴 CỤM 1: VẤN NẠN Ô NHIỄM (GÓC TRÁI - MID LEFT) — CHỈNH VỊ TRÍ TẠI ĐÂY
+  calloutPlasticCrisis: {
+    top: '36%',                // ← Vị trí dọc từ trên xuống (%)
+    left: '4%',                // ← Vị trí ngang từ lề trái (%)
+    offsetX: -350,                // ← Dịch ngang thêm (px): số âm (-) sang trái, số dương (+) sang phải
+    offsetY: 0,                // ← Dịch dọc thêm (px): số âm (-) lên trên, số dương (+) xuống dưới
+    scale: 1.0,                // ← Phóng to / thu nhỏ cụm thông tin (1.0 = 100%)
+    lineWidth: 90,             // ← Độ dài thanh chỉ line (px)
+    lineColor: '#FF009C',      // ← Màu sắc thanh chỉ line đơn sắc
+  },
+
+  // 🟢 CỤM 2: TẦM QUAN TRỌNG CỦA TÁI SINH (GÓC PHẢI TRÊN - TOP RIGHT) — CHỈNH VỊ TRÍ TẠI ĐÂY
+  calloutWhyRecycle: {
+    top: '12%',                // ← Vị trí dọc từ trên xuống (%)
+    right: '4%',               // ← Vị trí ngang từ lề phải (%)
+    offsetX: 300,                // ← Dịch ngang thêm (px)
+    offsetY: 0,                // ← Dịch dọc thêm (px)
+    scale: 1.0,                // ← Phóng to / thu nhỏ
+    lineWidth: 90,             // ← Độ dài thanh chỉ line (px)
+    lineColor: '#0020D7',      // ← Màu sắc thanh chỉ line đơn sắc
+  },
+
+  // 🔵 CỤM 3: GIẢI PHÁP RE-LIFE (GÓC PHẢI DƯỚI - BOTTOM RIGHT) — CHỈNH VỊ TRÍ TẠI ĐÂY
+  calloutCircularArt: {
+    bottom: '10%',             // ← Vị trí dọc từ đáy lên (%)
+    right: '4%',               // ← Vị trí ngang từ lề phải (%)
+    offsetX: 150,                // ← Dịch ngang thêm (px) 
+    offsetY: 0,                // ← Dịch dọc thêm (px)
+    scale: 1.0,                // ← Phóng to / thu nhỏ
+    lineWidth: 90,             // ← Độ dài thanh chỉ line (px)
+    lineColor: '#0020D7',      // ← Màu sắc thanh chỉ line đơn sắc
+  },
 
   // 🌟 7. HIỆU ỨNG TẬP TRUNG 3 ẢNH & LÀM MỜ OPACITY (GIỮ NGUYÊN 100% MÀU GỐC)
   activeCardOpacity: 1.0,         // Độ rõ nét 3 thẻ chính diện (100% - Đậm đặc, rõ nét)
@@ -127,7 +160,7 @@ const SPIRAL_ITEMS: SpiralCardData[] = [
     subtitle: 'Pure Recycled Granules',
     category: 'RAW_MATERIAL',
     materialCode: '100% PCR HDPE',
-    description: 'Hạt nhựa nguyên sinh tái chế chất lượng cao, tiền đề cho các mẫu đồ chơi nghệ thuật Yang Studio Collectibles.',
+    description: 'Hạt nhựa nguyên sinh tái chế chất lượng cao, tiền đề cho các mẫu đồ chơi nghệ thuật RELIFE LAB Collectibles.',
     imageUrl: pelletImg,
     color: '#A7F417',
   },
@@ -358,20 +391,103 @@ function FloatingBottle3D({
   );
 }
 
+// ── COMPONENT: FLOATING 3D PLASTIC FLAKES / PARTICLES (MẢNH NHỰA 3D LƠ LỬNG RỘNG TOÀN MÀN HÌNH DESKTOP) ──
+function FloatingPlasticFlakes3D({ count = 140 }: { count?: number }) {
+  const meshRef = useRef<THREE.InstancedMesh>(null);
+  const dummy = useMemo(() => new THREE.Object3D(), []);
+
+  // Array of 3D plastic flake parameters with brand colors spanning full desktop screen width
+  const flakesData = useMemo(() => {
+    const palette = ['#FF009C', '#0020D7', '#A7F417', '#00F0FF', '#FFDE00', '#FF5500', '#FF0087', '#00E5FF'];
+    return Array.from({ length: count }, (_, i) => ({
+      x: (Math.random() - 0.5) * 35.0, // Spans from -17.5 to +17.5 (Full Desktop Screen Width)
+      y: (Math.random() - 0.5) * 19.0, // Spans from -9.5 to +9.5 (Full Viewport Height)
+      z: (Math.random() - 0.5) * 10.0 - 0.5,
+      rotX: Math.random() * Math.PI * 2,
+      rotY: Math.random() * Math.PI * 2,
+      rotZ: Math.random() * Math.PI * 2,
+      speedX: (Math.random() - 0.5) * 0.4,
+      speedY: 0.15 + Math.random() * 0.4,
+      rotSpeedX: (Math.random() - 0.5) * 1.6,
+      rotSpeedY: (Math.random() - 0.5) * 2.0,
+      rotSpeedZ: (Math.random() - 0.5) * 1.6,
+      scale: 0.08 + Math.random() * 0.22,
+      color: new THREE.Color(palette[i % palette.length]),
+    }));
+  }, [count]);
+
+  const flakeGeometry = useMemo(() => {
+    const geom = new THREE.BufferGeometry();
+    const vertices = new Float32Array([
+      -0.45, -0.35, 0.06,
+      0.5, -0.25, -0.06,
+      0.35, 0.45, 0.08,
+      -0.4, 0.35, -0.08,
+    ]);
+    const indices = [0, 1, 2, 0, 2, 3];
+    geom.setAttribute('position', new THREE.BufferAttribute(vertices, 3));
+    geom.setIndex(indices);
+    geom.computeVertexNormals();
+    return geom;
+  }, []);
+
+  useEffect(() => {
+    if (!meshRef.current) return;
+    flakesData.forEach((flake, i) => {
+      meshRef.current?.setColorAt(i, flake.color);
+    });
+    meshRef.current.instanceColor!.needsUpdate = true;
+  }, [flakesData]);
+
+  useFrame((state) => {
+    if (!meshRef.current) return;
+    const time = state.clock.getElapsedTime();
+
+    flakesData.forEach((flake, i) => {
+      const curY = flake.y + Math.sin(time * flake.speedY + i * 0.7) * 0.45;
+      const curX = flake.x + Math.cos(time * 0.4 + i * 0.5) * 0.35;
+      const curZ = flake.z + Math.sin(time * 0.3 + i * 0.9) * 0.25;
+
+      dummy.position.set(curX, curY, curZ);
+      dummy.rotation.set(
+        flake.rotX + time * flake.rotSpeedX,
+        flake.rotY + time * flake.rotSpeedY,
+        flake.rotZ + time * flake.rotSpeedZ
+      );
+      dummy.scale.set(flake.scale, flake.scale, flake.scale);
+      dummy.updateMatrix();
+
+      meshRef.current?.setMatrixAt(i, dummy.matrix);
+    });
+
+    meshRef.current.instanceMatrix.needsUpdate = true;
+  });
+
+  return (
+    <instancedMesh ref={meshRef} args={[flakeGeometry, undefined, count]}>
+      <meshStandardMaterial
+        side={THREE.DoubleSide}
+        roughness={0.15}
+        metalness={0.1}
+        transparent={true}
+        opacity={0.92}
+      />
+    </instancedMesh>
+  );
+}
+
 // ── COMPONENT: SINGLE 3D CURVED SPIRAL CARD ──
 function SpiralCurvedCard({
   item,
   index,
   totalItems,
   scrollProgressRef,
-  onCardClick,
   onHoverChange,
 }: {
   item: SpiralCardData;
   index: number;
   totalItems: number;
   scrollProgressRef: React.MutableRefObject<number>;
-  onCardClick: (item: SpiralCardData) => void;
   onHoverChange: (isHovered: boolean) => void;
 }) {
   const groupRef = useRef<THREE.Group>(null);
@@ -506,10 +622,6 @@ function SpiralCurvedCard({
       <mesh
         ref={meshRef}
         geometry={curvedGeometry}
-        onClick={(e) => {
-          e.stopPropagation();
-          onCardClick(item);
-        }}
         onPointerOver={(e) => {
           e.stopPropagation();
           setHovered(true);
@@ -537,12 +649,10 @@ function SpiralCurvedCard({
 function SpiralScene({
   items,
   scrollProgressRef,
-  onCardClick,
   onHoverChange,
 }: {
   items: SpiralCardData[];
   scrollProgressRef: React.MutableRefObject<number>;
-  onCardClick: (item: SpiralCardData) => void;
   onHoverChange: (isHovered: boolean) => void;
 }) {
   return (
@@ -554,13 +664,16 @@ function SpiralScene({
       <pointLight position={[0, 5, 0]} intensity={1.5} color="#FF009C" distance={12} />
 
       <Suspense fallback={null}>
+        {/* 🍃 0. MẢNH NHỰA 3D LƠ LỬNG RỘNG TOÀN MÀN HÌNH DESKTOP */}
+        <FloatingPlasticFlakes3D count={140} />
+
         {/* 🍾 1. CÁC CHAI NHỰA 3D LƠ LỬNG XUNG QUANH THEO BẢN SKETCH */}
         {SPIRAL_CONFIG.showFloatingBottles && (
           <group>
             {/* Chai góc trên - trái (Top-Left) */}
             <FloatingBottle3D
               modelUrl={chai1Model}
-              initialPosition={[-5.6, 2.5, 0.4]}
+              initialPosition={[-7.5, 3.2, 0.4]}
               scale={SPIRAL_CONFIG.bottleScaleTopLeft}
               floatSpeed={1.1}
               floatOffset={0}
@@ -570,7 +683,7 @@ function SpiralScene({
             {/* Chai góc dưới - trái (Bottom-Left) */}
             <FloatingBottle3D
               modelUrl={chai2Model}
-              initialPosition={[-6.0, -2.5, 0.8]}
+              initialPosition={[-7.8, -3.2, 0.8]}
               scale={SPIRAL_CONFIG.bottleScaleBottomLeft}
               floatSpeed={1.3}
               floatOffset={2.2}
@@ -580,7 +693,7 @@ function SpiralScene({
             {/* Chai góc dưới - phải (Bottom-Right) */}
             <FloatingBottle3D
               modelUrl={chai3Model}
-              initialPosition={[5.8, -2.2, 0.6]}
+              initialPosition={[7.6, -3.0, 0.6]}
               scale={SPIRAL_CONFIG.bottleScaleBottomRight}
               floatSpeed={1.0}
               floatOffset={4.1}
@@ -597,7 +710,6 @@ function SpiralScene({
             index={idx}
             totalItems={items.length}
             scrollProgressRef={scrollProgressRef}
-            onCardClick={onCardClick}
             onHoverChange={onHoverChange}
           />
         ))}
@@ -608,7 +720,6 @@ function SpiralScene({
 
 // ── MAIN EXPORTED COMPONENT: SPIRAL 3D SLIDER (GIAO DIỆN THUẦN 3D CINEMATIC KHÔNG NÚT BẤM) ──
 export default function Spiral3DSlider() {
-  const [selectedItem, setSelectedItem] = useState<SpiralCardData | null>(null);
   const [isHovered, setIsHovered] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -689,12 +800,8 @@ export default function Spiral3DSlider() {
   return (
     <div
       ref={containerRef}
-      className={`relative w-full ${SPIRAL_CONFIG.containerHeight} bg-transparent text-white overflow-visible select-none`}
+      className={`relative w-full ${SPIRAL_CONFIG.containerHeight} bg-transparent text-black overflow-visible select-none`}
     >
-      {/* ── BACKGROUND CYBER VORTEX GLOW ── */}
-      <div className="absolute inset-0 pointer-events-none opacity-20">
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_#0020D7_0%,_transparent_70%)]" />
-      </div>
 
       {/* ── 3D CANVAS VIEWPORT (CHỨA DÒNG XOẮN ỐC & CÁC CHAI 3D LƠ LỬNG) ── */}
       <div
@@ -708,105 +815,130 @@ export default function Spiral3DSlider() {
           gl={{ alpha: true, antialias: true, preserveDrawingBuffer: true }}
           style={{ width: '100%', height: '100%', background: 'transparent' }}
         >
-          <fog attach="fog" args={['#000000', 10, 28]} />
+          <fog attach="fog" args={['#ffffff', 10, 28]} />
 
           <SpiralScene
             items={SPIRAL_ITEMS}
             scrollProgressRef={scrollProgressRef}
-            onCardClick={(item) => setSelectedItem(item)}
             onHoverChange={setIsHovered}
           />
           <Environment preset="city" />
         </Canvas>
       </div>
 
-      {/* ── 📡 CÁC THANH CHỈ & HỘP THÔNG TIN VẤN NẠN Ô NHIỄM (THEO SKETCH CỦA BẠN) ── */}
+      {/* ── 📡 CÁC THANH CHỈ & THÔNG TIN VẤN NẠN Ô NHIỄM (THIẾT KẾ KHÔNG KHUNG BẢNG, CHỈ LINE VÀ VĂN BẢN) ── */}
       {SPIRAL_CONFIG.showInfoCallouts && (
         <div className="absolute inset-0 pointer-events-none z-10">
 
           {/* 🔴 1. CALLOUT BÊN TRÁI: VẤN NẠN Ô NHIỄM CHAI NHỰA (MID-LEFT) */}
-          <div className="absolute top-[36%] left-2 sm:left-6 md:left-8 max-w-[280px] sm:max-w-[340px] pointer-events-auto">
-            {/* Pointer SVG Line */}
-            <div className="relative">
-              <div className="bg-black/75 backdrop-blur-md border-2 border-white/20 hover:border-[#FF009C] transition-all p-4 rounded-2xl shadow-[6px_6px_0px_#000000] text-left group">
-                <div className="flex items-center gap-2 mb-1.5">
-                  <span className="w-2.5 h-2.5 rounded-full bg-[#FF009C] animate-ping" />
-                  <span className="font-mono text-[10px] font-black uppercase tracking-wider text-[#FF009C] flex items-center gap-1">
+          <div
+            className="absolute max-w-[280px] sm:max-w-[340px] pointer-events-auto transition-all duration-300"
+            style={{
+              top: SPIRAL_CONFIG.calloutPlasticCrisis.top,
+              left: SPIRAL_CONFIG.calloutPlasticCrisis.left,
+              transform: `translate(${SPIRAL_CONFIG.calloutPlasticCrisis.offsetX}px, ${SPIRAL_CONFIG.calloutPlasticCrisis.offsetY}px) scale(${SPIRAL_CONFIG.calloutPlasticCrisis.scale})`,
+              transformOrigin: 'left center',
+            }}
+          >
+            <div className="relative text-left">
+              {/* Clean Frameless Info Content (Bỏ khung bảng) */}
+              <div className="group">
+                <div className="flex items-center gap-2 mb-1">
+                  <span className="w-2.5 h-2.5 rounded-full animate-ping" style={{ backgroundColor: SPIRAL_CONFIG.calloutPlasticCrisis.lineColor }} />
+                  <span className="font-mono text-[10px] font-black uppercase tracking-wider flex items-center gap-1" style={{ color: SPIRAL_CONFIG.calloutPlasticCrisis.lineColor }}>
                     <AlertTriangle size={12} /> VẤN NẠN Ô NHIỄM // PLASTIC_CRISIS
                   </span>
                 </div>
-                <h4 className="font-display text-lg sm:text-xl font-black uppercase text-white tracking-tight mb-1">
+                <h4 className="font-display text-xl sm:text-2xl font-black uppercase text-black tracking-tight mb-1">
                   450 - 1000 Năm Phân Hủy
                 </h4>
-                <p className="font-sans text-xs text-gray-300 leading-relaxed mb-2.5">
+                <p className="font-sans text-xs sm:text-sm text-gray-700 leading-relaxed mb-2.5 font-medium">
                   Hơn 1 triệu chai nhựa bị vứt bỏ mỗi phút. Chúng vỡ vụn thành hàng tỷ vi nhựa (microplastics) ngấm vào nguồn nước, hủy hoại đại dương và chuỗi thức ăn con người.
                 </p>
-                <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-white/10 text-[9px] font-mono font-bold text-gray-300">
-                  <span className="text-[#FF009C]">●</span> 8.3 Tỷ Tấn Rác Toàn Cầu
+                <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-black/5 backdrop-blur-sm text-[9.5px] font-mono font-bold text-gray-800 border border-black/10">
+                  <span style={{ color: SPIRAL_CONFIG.calloutPlasticCrisis.lineColor }}>●</span> 8.3 Tỷ Tấn Rác Toàn Cầu
                 </div>
               </div>
 
-              {/* Technical Indicator Line pointing to the 3D spiral */}
-              <div className="hidden lg:flex items-center absolute -right-24 top-1/2 -translate-y-1/2 pointer-events-none">
-                <div className="w-20 h-[2px] bg-gradient-to-r from-[#FF009C] to-[#D1FF00]" />
-                <div className="w-3 h-3 rounded-full bg-[#D1FF00] border-2 border-black animate-pulse" />
+              {/* Technical Indicator Line chỉa sang phía 3D spiral */}
+              <div className="hidden lg:flex items-center absolute top-1/2 -translate-y-1/2 pointer-events-none" style={{ right: `-${SPIRAL_CONFIG.calloutPlasticCrisis.lineWidth + 8}px` }}>
+                <div className="h-[2px]" style={{ width: `${SPIRAL_CONFIG.calloutPlasticCrisis.lineWidth}px`, backgroundColor: SPIRAL_CONFIG.calloutPlasticCrisis.lineColor }} />
+                <div className="w-3 h-3 rounded-full border-2 border-black animate-pulse" style={{ backgroundColor: SPIRAL_CONFIG.calloutPlasticCrisis.lineColor }} />
               </div>
             </div>
           </div>
 
           {/* 🟢 2. CALLOUT BÊN PHẢI TRÊN: TẦM QUAN TRỌNG CỦA TÁI SINH (TOP-RIGHT) */}
-          <div className="absolute top-[12%] right-2 sm:right-6 md:right-8 max-w-[280px] sm:max-w-[340px] pointer-events-auto">
-            <div className="relative">
-              {/* Technical Indicator Line pointing from 3D spiral to this card */}
-              <div className="hidden lg:flex items-center absolute -left-24 top-1/2 -translate-y-1/2 pointer-events-none">
-                <div className="w-3 h-3 rounded-full bg-[#D1FF00] border-2 border-black animate-pulse" />
-                <div className="w-20 h-[2px] bg-gradient-to-r from-[#D1FF00] to-[#0020D7]" />
+          <div
+            className="absolute max-w-[280px] sm:max-w-[340px] pointer-events-auto transition-all duration-300"
+            style={{
+              top: SPIRAL_CONFIG.calloutWhyRecycle.top,
+              right: SPIRAL_CONFIG.calloutWhyRecycle.right,
+              transform: `translate(${SPIRAL_CONFIG.calloutWhyRecycle.offsetX}px, ${SPIRAL_CONFIG.calloutWhyRecycle.offsetY}px) scale(${SPIRAL_CONFIG.calloutWhyRecycle.scale})`,
+              transformOrigin: 'right center',
+            }}
+          >
+            <div className="relative text-left">
+              {/* Technical Indicator Line chỉa từ 3D spiral sang */}
+              <div className="hidden lg:flex items-center absolute top-1/2 -translate-y-1/2 pointer-events-none" style={{ left: `-${SPIRAL_CONFIG.calloutWhyRecycle.lineWidth + 8}px` }}>
+                <div className="w-3 h-3 rounded-full border-2 border-black animate-pulse" style={{ backgroundColor: SPIRAL_CONFIG.calloutWhyRecycle.lineColor }} />
+                <div className="h-[2px]" style={{ width: `${SPIRAL_CONFIG.calloutWhyRecycle.lineWidth}px`, backgroundColor: SPIRAL_CONFIG.calloutWhyRecycle.lineColor }} />
               </div>
 
-              <div className="bg-black/75 backdrop-blur-md border-2 border-white/20 hover:border-[#D1FF00] transition-all p-4 rounded-2xl shadow-[6px_6px_0px_#000000] text-left group">
-                <div className="flex items-center gap-2 mb-1.5">
-                  <span className="w-2.5 h-2.5 rounded-full bg-[#D1FF00] animate-ping" />
-                  <span className="font-mono text-[10px] font-black uppercase tracking-wider text-[#D1FF00] flex items-center gap-1">
+              {/* Clean Frameless Info Content (Bỏ khung bảng) */}
+              <div className="group">
+                <div className="flex items-center gap-2 mb-1">
+                  <span className="w-2.5 h-2.5 rounded-full animate-ping" style={{ backgroundColor: SPIRAL_CONFIG.calloutWhyRecycle.lineColor }} />
+                  <span className="font-mono text-[10px] font-black uppercase tracking-wider flex items-center gap-1" style={{ color: SPIRAL_CONFIG.calloutWhyRecycle.lineColor }}>
                     <Sparkles size={12} /> TẦM QUAN TRỌNG // WHY_RECYCLE
                   </span>
                 </div>
-                <h4 className="font-display text-lg sm:text-xl font-black uppercase text-white tracking-tight mb-1">
+                <h4 className="font-display text-xl sm:text-2xl font-black uppercase text-black tracking-tight mb-1">
                   Giảm 70% Khí Thải Carbon
                 </h4>
-                <p className="font-sans text-xs text-gray-300 leading-relaxed mb-2.5">
+                <p className="font-sans text-xs sm:text-sm text-gray-700 leading-relaxed mb-2.5 font-medium">
                   Tái chế khép kín giúp tiết kiệm 80% năng lượng so với sản xuất hạt nhựa mới từ dầu mỏ, biến rác thải độc hại thành tài nguyên tuần hoàn bền vững.
                 </p>
-                <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-white/10 text-[9px] font-mono font-bold text-gray-300">
-                  <span className="text-[#D1FF00]">●</span> Tiết kiệm 1.5kg CO2 / kg Nhựa
+                <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-black/5 backdrop-blur-sm text-[9.5px] font-mono font-bold text-gray-800 border border-black/10">
+                  <span style={{ color: SPIRAL_CONFIG.calloutWhyRecycle.lineColor }}>●</span> Tiết kiệm 1.5kg CO2 / kg Nhựa
                 </div>
               </div>
             </div>
           </div>
 
           {/* 🔵 3. CALLOUT BÊN PHẢI DƯỚI: GIẢI PHÁP NGHỆ THUẬT RE-LIFE (BOTTOM-RIGHT) */}
-          <div className="absolute bottom-[10%] right-2 sm:right-6 md:right-8 max-w-[280px] sm:max-w-[340px] pointer-events-auto">
-            <div className="relative">
-              {/* Technical Indicator Line pointing from 3D spiral to this card */}
-              <div className="hidden lg:flex items-center absolute -left-24 top-1/2 -translate-y-1/2 pointer-events-none">
-                <div className="w-3 h-3 rounded-full bg-[#00F0FF] border-2 border-black animate-pulse" />
-                <div className="w-20 h-[2px] bg-gradient-to-r from-[#00F0FF] to-[#D1FF00]" />
+          <div
+            className="absolute max-w-[280px] sm:max-w-[340px] pointer-events-auto transition-all duration-300"
+            style={{
+              bottom: SPIRAL_CONFIG.calloutCircularArt.bottom,
+              right: SPIRAL_CONFIG.calloutCircularArt.right,
+              transform: `translate(${SPIRAL_CONFIG.calloutCircularArt.offsetX}px, ${SPIRAL_CONFIG.calloutCircularArt.offsetY}px) scale(${SPIRAL_CONFIG.calloutCircularArt.scale})`,
+              transformOrigin: 'right center',
+            }}
+          >
+            <div className="relative text-left">
+              {/* Technical Indicator Line chỉa từ 3D spiral sang */}
+              <div className="hidden lg:flex items-center absolute top-1/2 -translate-y-1/2 pointer-events-none" style={{ left: `-${SPIRAL_CONFIG.calloutCircularArt.lineWidth + 8}px` }}>
+                <div className="w-3 h-3 rounded-full border-2 border-black animate-pulse" style={{ backgroundColor: SPIRAL_CONFIG.calloutCircularArt.lineColor }} />
+                <div className="h-[2px]" style={{ width: `${SPIRAL_CONFIG.calloutCircularArt.lineWidth}px`, backgroundColor: SPIRAL_CONFIG.calloutCircularArt.lineColor }} />
               </div>
 
-              <div className="bg-black/75 backdrop-blur-md border-2 border-white/20 hover:border-[#00F0FF] transition-all p-4 rounded-2xl shadow-[6px_6px_0px_#000000] text-left group">
-                <div className="flex items-center gap-2 mb-1.5">
-                  <span className="w-2.5 h-2.5 rounded-full bg-[#00F0FF] animate-ping" />
-                  <span className="font-mono text-[10px] font-black uppercase tracking-wider text-[#00F0FF] flex items-center gap-1">
+              {/* Clean Frameless Info Content (Bỏ khung bảng) */}
+              <div className="group">
+                <div className="flex items-center gap-2 mb-1">
+                  <span className="w-2.5 h-2.5 rounded-full animate-ping" style={{ backgroundColor: SPIRAL_CONFIG.calloutCircularArt.lineColor }} />
+                  <span className="font-mono text-[10px] font-black uppercase tracking-wider flex items-center gap-1" style={{ color: SPIRAL_CONFIG.calloutCircularArt.lineColor }}>
                     <RefreshCw size={12} /> GIẢI PHÁP RE-LIFE // CIRCULAR_ART
                   </span>
                 </div>
-                <h4 className="font-display text-lg sm:text-xl font-black uppercase text-white tracking-tight mb-1">
+                <h4 className="font-display text-xl sm:text-2xl font-black uppercase text-black tracking-tight mb-1">
                   91% Chưa Được Tái Chế
                 </h4>
-                <p className="font-sans text-xs text-gray-300 leading-relaxed mb-2.5">
-                  Yang Studio thu gom và đúc nén nhiệt nắp chai thành các tác phẩm Art Toys sưu tầm độc bản, tích hợp chip NFC xác thực On-Chain minh bạch.
+                <p className="font-sans text-xs sm:text-sm text-gray-700 leading-relaxed mb-2.5 font-medium">
+                  RELIFE LAB thu gom và đúc nén nhiệt nắp chai thành các tác phẩm Art Toys sưu tầm độc bản, tích hợp chip NFC xác thực On-Chain minh bạch.
                 </p>
-                <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-white/10 text-[9px] font-mono font-bold text-gray-300">
-                  <span className="text-[#00F0FF]">●</span> 100% PCR HDPE • NFC On-Chain
+                <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-black/5 backdrop-blur-sm text-[9.5px] font-mono font-bold text-gray-800 border border-black/10">
+                  <span style={{ color: SPIRAL_CONFIG.calloutCircularArt.lineColor }}>●</span> 100% PCR HDPE • NFC On-Chain
                 </div>
               </div>
             </div>
@@ -815,74 +947,6 @@ export default function Spiral3DSlider() {
         </div>
       )}
 
-      {/* ── MODAL CHI TIẾT TÁC PHẨM / CHẤT LIỆU KHI CLICK VÀO CARD ── */}
-      <AnimatePresence>
-        {selectedItem && (
-          <div
-            className="fixed inset-0 z-[10000] flex items-center justify-center p-4 sm:p-6 bg-black/80 backdrop-blur-md"
-            onClick={() => setSelectedItem(null)}
-          >
-            <motion.div
-              initial={{ opacity: 0, scale: 0.88, y: 25 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.88, y: 25 }}
-              className="relative w-full max-w-2xl bg-[#0F0F14] border-3 border-[#D1FF00] rounded-[36px] p-6 sm:p-8 shadow-[12px_12px_0px_#D1FF00] text-white overflow-hidden"
-              onClick={(e) => e.stopPropagation()}
-            >
-              {/* Close Button */}
-              <button
-                onClick={() => setSelectedItem(null)}
-                className="absolute top-5 right-5 w-10 h-10 rounded-full bg-black/80 border-2 border-white/40 text-white flex items-center justify-center font-bold hover:bg-[#FF009C] hover:border-black transition-all cursor-pointer z-10"
-              >
-                <X size={18} />
-              </button>
-
-              <div className="flex flex-col md:flex-row items-center gap-6">
-                {/* Image Showcase */}
-                <div className="w-full md:w-1/2 h-56 sm:h-64 rounded-2xl overflow-hidden border-2 border-white/20 relative shadow-inner">
-                  <img
-                    src={selectedItem.imageUrl}
-                    alt={selectedItem.title}
-                    className="w-full h-full object-cover"
-                  />
-                  <div className="absolute top-3 left-3 px-2.5 py-1 rounded-full bg-black/80 backdrop-blur-sm text-[9px] font-mono font-bold text-[#D1FF00] border border-[#D1FF00]/40 uppercase">
-                    {selectedItem.category}
-                  </div>
-                </div>
-
-                {/* Information Details */}
-                <div className="w-full md:w-1/2 flex flex-col justify-between text-left">
-                  <div>
-                    <span className="font-mono text-[10px] text-[#D1FF00] font-black uppercase tracking-wider block mb-1">
-                      {selectedItem.materialCode}
-                    </span>
-                    <h3 className="font-display font-black text-2xl sm:text-3xl uppercase tracking-tight text-white mb-1">
-                      {selectedItem.title}
-                    </h3>
-                    <p className="font-mono text-xs text-gray-400 font-semibold mb-3">
-                      {selectedItem.subtitle}
-                    </p>
-                    <p className="font-sans text-xs text-gray-300 leading-relaxed mb-4">
-                      {selectedItem.description}
-                    </p>
-                  </div>
-
-                  <div className="p-3 bg-white/5 rounded-xl border border-white/10 space-y-1 font-mono text-[10px] text-gray-300">
-                    <div className="flex justify-between">
-                      <span className="text-gray-400">Định Dạng:</span>
-                      <span className="text-white font-bold">3D Curved Spiral Mesh</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-gray-400">Xác Thực Sinh Thái:</span>
-                      <span className="text-[#D1FF00] font-bold">NFC On-Chain Ready</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </motion.div>
-          </div>
-        )}
-      </AnimatePresence>
     </div>
   );
 }

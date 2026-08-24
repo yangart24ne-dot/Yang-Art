@@ -871,7 +871,7 @@ export const DrawingCanvas: React.FC<DrawingCanvasProps> = ({
 
             {/* ILLUSTRATION MASCOT */}
             <div 
-              className="hidden md:flex pt-4 self-center justify-center w-full relative z-20 pointer-events-none"
+              className="hidden md:flex pt-4 self-center justify-center w-full relative z-20 pointer-events-none overflow-visible"
               style={{
                 transform: `translate(${cfg.mascot.offsetX}px, ${cfg.mascot.offsetY}px) scale(${cfg.mascot.scale})`,
                 transformOrigin: 'center'
@@ -879,8 +879,11 @@ export const DrawingCanvas: React.FC<DrawingCanvasProps> = ({
             >
               <img
                 src={assetCharacter}
-                className="w-40 max-w-full h-auto object-contain select-none pointer-events-none"
-                alt="Yang Studio Mascot Asset 84"
+                className="max-w-none h-auto object-contain select-none pointer-events-none overflow-visible"
+                style={{
+                  width: `${160 * (280.62 / 180.62)}px`,
+                }}
+                alt="RELIFE LAB Mascot Asset 84"
               />
             </div>
           </div>

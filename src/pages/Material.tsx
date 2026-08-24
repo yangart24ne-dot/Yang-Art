@@ -2,9 +2,7 @@ import React, { useState, useEffect } from "react";
 import { motion } from "motion/react";
 import { Plus } from "lucide-react";
 import PageContainer from "../components/PageContainer";
-import Product3DViewer from "../components/Product3DViewer";
 import Spiral3DSlider from "../components/Spiral3DSlider";
-import chai1Model from "../assets/PLASTIC 3D/chai1.glb?url";
 
 import group39473 from "../assets/infor material/Group 39473.svg";
 import weTransformText from "../assets/infor material/We transform sustainable materials into design legacies..svg";
@@ -107,27 +105,31 @@ export const MATERIAL_ASSETS_CONFIG = {
 
   // ── BƯỚC 1: THE HUNT ──
   hunt: {
-    circle: { offsetX: 0, offsetY: 0, scale: 1.0 },   // Group 13.svg — Vòng tròn icon
-    title: { offsetX: 0, offsetY: 0, scale: 1.0 },    // THE HUNT.svg — Tiêu đề
-    desc: { offsetX: 0, offsetY: 0, scale: 1.0 },     // hunt_desc.svg — Mô tả
+    group: { offsetX: -100, offsetY: 0, scale: 0.9 },         // ← DỊCH CHUYỂN & SCALE TỔNG TẤT CẢ ASSET CỦA BƯỚC 1
+    circle: { offsetX: -200, offsetY: 100, scale: 2.5 },   // Group 13.svg — Vòng tròn icon 
+    title: { offsetX: -200, offsetY: 270, scale: 1.4 },    // THE HUNT.svg — Tiêu đề  
+    desc: { offsetX: -200, offsetY: 300, scale: 1.5 },     // hunt_desc.svg — Mô tả 
   },
 
   // ── BƯỚC 2: THE SHRED ──
   shred: {
-    circle: { offsetX: 0, offsetY: 0, scale: 1.0 },   // Group 14.svg — Vòng tròn icon
-    title: { offsetX: 0, offsetY: 0, scale: 1.0 },    // THE SHRED.svg — Tiêu đề
-    desc: { offsetX: 0, offsetY: 0, scale: 1.0 },     // shred_desc.svg — Mô tả
+    group: { offsetX: 0, offsetY: -180, scale: 0.9 },         // ← DỊCH CHUYỂN & SCALE TỔNG TẤT CẢ ASSET CỦA BƯỚC 2
+    circle: { offsetX: 0, offsetY: 0, scale: 2.4 },   // Group 14.svg — Vòng tròn icon
+    title: { offsetX: 0, offsetY: 160, scale: 1.4 },    // THE SHRED.svg — Tiêu đề
+    desc: { offsetX: 0, offsetY: 190, scale: 1.5 },     // shred_desc.svg — Mô tả
   },
 
   // ── BƯỚC 3: THE COOK ──
   cook: {
-    circle: { offsetX: 0, offsetY: 0, scale: 1.0 },   // Group 15.svg — Vòng tròn icon
-    title: { offsetX: 0, offsetY: 0, scale: 1.0 },    // THE COOK.svg — Tiêu đề
-    desc: { offsetX: 0, offsetY: 0, scale: 1.0 },     // cook_desc.svg — Mô tả
+    group: { offsetX: 130, offsetY: -40, scale: 1.0 },         // ← DỊCH CHUYỂN & SCALE TỔNG TẤT CẢ ASSET CỦA BƯỚC 3
+    circle: { offsetX: 130, offsetY: -40, scale: 2.4 },   // Group 15.svg — Vòng tròn icon
+    title: { offsetX: 130, offsetY: 120, scale: 1.4 },    // THE COOK.svg — Tiêu đề
+    desc: { offsetX: 130, offsetY: 150, scale: 1.5 },     // cook_desc.svg — Mô tả
   },
 
   // ── BƯỚC 4: THE REBIRTH ──
   rebirth: {
+    group: { offsetX: 0, offsetY: 0, scale: 1.0 },         // ← DỊCH CHUYỂN & SCALE TỔNG TẤT CẢ ASSET CỦA BƯỚC 4
     circle: { offsetX: 0, offsetY: 0, scale: 1.0 },   // Group 16.svg — Vòng tròn icon
     title: { offsetX: 0, offsetY: 0, scale: 1.0 },    // THE REBIRTH.svg — Tiêu đề
     desc: { offsetX: 0, offsetY: 0, scale: 1.0 },     // rebirth_desc.svg — Mô tả
@@ -137,7 +139,7 @@ export const MATERIAL_ASSETS_CONFIG = {
   group39472: {
     offsetX: 0,      // ← Dịch ngang (px)
     offsetY: 0,      // ← Dịch dọc  (px) 
-    scale: 1.0,      // ← Phóng to / thu nhỏ
+    scale: 1.4,      // ← Phóng to / thu nhỏ
     opacity: 1.0,    // ← Độ trong suốt (0.0 – 1.0)
   },
 
@@ -366,9 +368,6 @@ const TypewriterSustainableText = () => {
 };
 
 export default function Material() {
-  const [autoRotate, setAutoRotate] = useState(true);
-  const [rotationSpeed, setRotationSpeed] = useState(60); // Tốc độ xoay tự động (deg/s)
-
   return (
     <div className="min-h-screen bg-[#FFFFFF] overflow-hidden">
 
@@ -529,7 +528,13 @@ export default function Material() {
             </div>
 
             {/* BƯỚC 1: THE HUNT — chỉnh trong MATERIAL_ASSETS_CONFIG.hunt */}
-            <div className="absolute left-[-2%] top-[18%] w-[260px] text-center flex flex-col items-center group">
+            <div
+              className="absolute left-[-2%] top-[18%] w-[260px] text-center flex flex-col items-center group"
+              style={{
+                transform: `translate(${MATERIAL_ASSETS_CONFIG.hunt.group.offsetX}px, ${MATERIAL_ASSETS_CONFIG.hunt.group.offsetY}px) scale(${MATERIAL_ASSETS_CONFIG.hunt.group.scale})`,
+                transformOrigin: 'center center',
+              }}
+            >
               <div className="relative mb-4" style={{ transform: `translate(${MATERIAL_ASSETS_CONFIG.hunt.circle.offsetX}px, ${MATERIAL_ASSETS_CONFIG.hunt.circle.offsetY}px) scale(${MATERIAL_ASSETS_CONFIG.hunt.circle.scale})`, transformOrigin: 'center' }}>
                 <div className="absolute inset-0 bg-[#A7F417] rounded-full scale-95 opacity-0 group-hover:opacity-20 group-hover:scale-105 transition-all duration-300 blur-md"></div>
                 <img src={group13} alt="THE HUNT Step" className="w-[180px] h-auto mx-auto relative z-10 transition-transform duration-500 group-hover:scale-105" />
@@ -541,7 +546,13 @@ export default function Material() {
             </div>
 
             {/* BƯỚC 2: THE SHRED — chỉnh trong MATERIAL_ASSETS_CONFIG.shred */}
-            <div className="absolute left-[36%] top-[-8%] w-[260px] text-center flex flex-col items-center group">
+            <div
+              className="absolute left-[36%] top-[-8%] w-[260px] text-center flex flex-col items-center group"
+              style={{
+                transform: `translate(${MATERIAL_ASSETS_CONFIG.shred.group.offsetX}px, ${MATERIAL_ASSETS_CONFIG.shred.group.offsetY}px) scale(${MATERIAL_ASSETS_CONFIG.shred.group.scale})`,
+                transformOrigin: 'center center',
+              }}
+            >
               <div className="relative mb-4" style={{ transform: `translate(${MATERIAL_ASSETS_CONFIG.shred.circle.offsetX}px, ${MATERIAL_ASSETS_CONFIG.shred.circle.offsetY}px) scale(${MATERIAL_ASSETS_CONFIG.shred.circle.scale})`, transformOrigin: 'center' }}>
                 <div className="absolute inset-0 bg-[#A7F417] rounded-full scale-95 opacity-0 group-hover:opacity-20 group-hover:scale-105 transition-all duration-300 blur-md"></div>
                 <img src={group14} alt="THE SHRED Step" className="w-[180px] h-auto mx-auto relative z-10 transition-transform duration-500 group-hover:scale-105" />
@@ -553,7 +564,13 @@ export default function Material() {
             </div>
 
             {/* BƯỚC 3: THE COOK — chỉnh trong MATERIAL_ASSETS_CONFIG.cook */}
-            <div className="absolute right-[-2%] top-[18%] w-[260px] text-center flex flex-col items-center group">
+            <div
+              className="absolute right-[-2%] top-[18%] w-[260px] text-center flex flex-col items-center group"
+              style={{
+                transform: `translate(${MATERIAL_ASSETS_CONFIG.cook.group.offsetX}px, ${MATERIAL_ASSETS_CONFIG.cook.group.offsetY}px) scale(${MATERIAL_ASSETS_CONFIG.cook.group.scale})`,
+                transformOrigin: 'center center',
+              }}
+            >
               <div className="relative mb-4" style={{ transform: `translate(${MATERIAL_ASSETS_CONFIG.cook.circle.offsetX}px, ${MATERIAL_ASSETS_CONFIG.cook.circle.offsetY}px) scale(${MATERIAL_ASSETS_CONFIG.cook.circle.scale})`, transformOrigin: 'center' }}>
                 <div className="absolute inset-0 bg-[#A7F417] rounded-full scale-95 opacity-0 group-hover:opacity-20 group-hover:scale-105 transition-all duration-300 blur-md"></div>
                 <img src={group15} alt="THE COOK Step" className="w-[180px] h-auto mx-auto relative z-10 transition-transform duration-500 group-hover:scale-105" />
@@ -565,7 +582,13 @@ export default function Material() {
             </div>
 
             {/* BƯỚC 4: THE REBIRTH — chỉnh trong MATERIAL_ASSETS_CONFIG.rebirth */}
-            <div className="absolute left-[38%] bottom-[-5%] w-[230px] text-center flex flex-col items-center group">
+            <div
+              className="absolute left-[38%] bottom-[-5%] w-[230px] text-center flex flex-col items-center group"
+              style={{
+                transform: `translate(${MATERIAL_ASSETS_CONFIG.rebirth.group.offsetX}px, ${MATERIAL_ASSETS_CONFIG.rebirth.group.offsetY}px) scale(${MATERIAL_ASSETS_CONFIG.rebirth.group.scale})`,
+                transformOrigin: 'center center',
+              }}
+            >
               <div className="relative mb-4" style={{ transform: `translate(${MATERIAL_ASSETS_CONFIG.rebirth.circle.offsetX}px, ${MATERIAL_ASSETS_CONFIG.rebirth.circle.offsetY}px) scale(${MATERIAL_ASSETS_CONFIG.rebirth.circle.scale})`, transformOrigin: 'center' }}>
                 <div className="absolute inset-0 bg-[#A7F417] rounded-full scale-95 opacity-0 group-hover:opacity-20 group-hover:scale-105 transition-all duration-300 blur-md"></div>
                 <img src={group16} alt="THE REBIRTH Step" className="w-[160px] h-auto mx-auto relative z-10 transition-transform duration-500 group-hover:scale-105" />
@@ -614,26 +637,31 @@ export default function Material() {
           3. SPIRAL 3D MOTION GALLERY (CINEMATIC MATERIAL VORTEX SLIDER)
           ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */}
       <div
-        className="w-full relative py-16 sm:py-20 md:py-24 bg-[#000000] text-white flex flex-col items-center border-t-4 border-[#D1FF00] border-b-4 border-[#0020D7] overflow-visible"
+        className="w-full relative py-16 sm:py-20 md:py-24 bg-[#FFFFFF] text-black flex flex-col items-center border-b-4 border-[#0020D7] overflow-visible"
         style={{
           transform: `translate(${MATERIAL_ASSETS_CONFIG.spiralSection.offsetX}px, ${MATERIAL_ASSETS_CONFIG.spiralSection.offsetY}px) scale(${MATERIAL_ASSETS_CONFIG.spiralSection.scale})`,
           transformOrigin: 'top center',
         }}
       >
-        <PageContainer size="wide" className="bg-transparent px-4 sm:px-6 lg:px-8 overflow-visible">
+        {/* 🍃 FLOATING DECORATIVE BACKGROUND GRID MARKERS */}
+        <div className="absolute inset-0 pointer-events-none overflow-hidden z-0">
+          {/* Grid plus markers */}
+          <div className="absolute top-8 left-10 text-[#0020D7]/20 font-mono text-xl font-bold select-none">+</div>
+          <div className="absolute top-8 right-10 text-[#0020D7]/20 font-mono text-xl font-bold select-none">+</div>
+          <div className="absolute bottom-8 left-10 text-[#0020D7]/20 font-mono text-xl font-bold select-none">+</div>
+          <div className="absolute bottom-8 right-10 text-[#0020D7]/20 font-mono text-xl font-bold select-none">+</div>
+        </div>
+
+        <PageContainer size="wide" className="bg-transparent px-4 sm:px-6 lg:px-8 overflow-visible relative z-10">
           {/* Header */}
           <div className="flex flex-col md:flex-row items-start md:items-end justify-between gap-6 mb-8 sm:mb-10">
             <div>
-              <div className="flex items-center gap-2 font-mono text-xs text-[#D1FF00] mb-2 uppercase tracking-widest font-bold">
-                <Plus size={14} className="text-[#D1FF00]" />
-                <span>SPIRAL_3D_MOTION // material_vortex_gallery</span>
-              </div>
-              <h2 className="font-display text-3xl sm:text-5xl lg:text-6xl uppercase tracking-tight font-black text-white leading-none">
-                Spiral 3D Slider
+              <h2 className="font-display text-3xl sm:text-5xl lg:text-6xl uppercase tracking-tight font-black text-[#0020D7] leading-none">
+                SUSTAINABLE MATERIALS
               </h2>
             </div>
 
-            <div className="max-w-md text-xs sm:text-sm font-sans text-gray-400 leading-relaxed">
+            <div className="max-w-md text-xs sm:text-sm font-sans text-gray-600 leading-relaxed">
               Quỹ đạo xoắn ốc 3D điện ảnh hiển thị hành trình vật liệu tuần hoàn. Cuộn chuột hoặc kéo thả để tương tác với các thẻ ảnh uốn cong trong không gian đa chiều.
             </div>
           </div>
@@ -643,107 +671,7 @@ export default function Material() {
         </PageContainer>
       </div>
 
-      {/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-          4. 3D MODEL VISUALIZER SECTION ([ 3D_PRODUCT_VISUALIZER ] & RECYCLED_BOTTLE)
-          ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */}
-      <div
-        className="w-full"
-        style={{
-          transform: `translate(${MATERIAL_ASSETS_CONFIG.visualizerSection.offsetX}px, ${MATERIAL_ASSETS_CONFIG.visualizerSection.offsetY}px) scale(${MATERIAL_ASSETS_CONFIG.visualizerSection.scale})`,
-          transformOrigin: 'top center',
-        }}
-      >
-        <PageContainer size="wide" className="bg-transparent px-4 sm:px-6 lg:px-8 py-20">
-          <div className="flex flex-col gap-8 mb-16">
-            {/* Header */}
-            <div className="w-full">
-              <div className="flex items-center gap-2 font-mono text-xs mb-4">
-                <Plus size={14} className="text-acid" />
-                <span>PORTFOLIO_V.4.0 // 3D_MATERIAL_INVENTORY</span>
-              </div>
-            </div>
 
-            {/* 3D Model Visualizer Section */}
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-              {/* 3D Viewer Card */}
-              <div className="lg:col-span-2 bg-white border-2 border-black rounded-[30px] p-6 shadow-[8px_8px_0px_rgba(0,0,0,1)] relative overflow-hidden flex flex-col justify-between h-[600px]">
-                <div className="flex justify-between items-center mb-4">
-                  <div className="flex items-center gap-2">
-                    <span className="w-2.5 h-2.5 rounded-full bg-[#A7F417] animate-pulse"></span>
-                    <span className="font-mono text-xs font-black uppercase tracking-wider text-gray-500">[ 3D_PRODUCT_VISUALIZER ]</span>
-                  </div>
-                  <div className="flex items-center gap-4">
-                    <div className="flex items-center gap-2">
-                      <span className="text-[9px] font-black uppercase text-gray-400 font-mono">Speed:</span>
-                      <input
-                        type="range"
-                        min="10"
-                        max="180"
-                        step="5"
-                        value={rotationSpeed}
-                        onChange={(e) => setRotationSpeed(parseInt(e.target.value))}
-                        className="w-20 h-1 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-[#0020D7] outline-none"
-                      />
-                      <span className="text-[9px] font-black text-black font-mono w-8 text-right">{rotationSpeed}°/s</span>
-                    </div>
-                    <button
-                      onClick={() => setAutoRotate(!autoRotate)}
-                      className={`px-3 py-1.5 text-[9px] font-black uppercase tracking-widest rounded-lg border-2 border-black transition-all cursor-pointer shadow-[2px_2px_0px_rgba(0,0,0,1)] hover:translate-y-[-1px] hover:shadow-[3px_3px_0px_rgba(0,0,0,1)] active:translate-y-[1px] active:shadow-[1px_1px_0px_rgba(0,0,0,1)] ${autoRotate ? 'bg-[#A7F417]' : 'bg-white'}`}
-                    >
-                      {autoRotate ? "Pause Spin" : "Auto Rotate"}
-                    </button>
-                  </div>
-                </div>
-
-                <div className="flex-1 relative rounded-[20px] overflow-hidden border-2 border-black bg-gradient-to-br from-gray-900 via-gray-800 to-black h-full">
-                  <Product3DViewer
-                    modelPath={chai1Model}
-                    autoRotate={autoRotate}
-                    autoRotateSpeed={`${rotationSpeed}deg`}
-                    className="h-full w-full"
-                  />
-                </div>
-              </div>
-
-              {/* Info Card */}
-              <div className="bg-white border-2 border-black rounded-[30px] p-6 shadow-[8px_8px_0px_rgba(0,0,0,1)] flex flex-col justify-between h-[600px]">
-                <div>
-                  <div className="text-[10px] font-mono font-black text-[#0020D7] uppercase tracking-widest mb-4">
-                    [ SPECIFICATIONS_&_DATA ]
-                  </div>
-                  <h2 className="font-display text-4xl text-black uppercase tracking-tight mb-4 leading-none">
-                    RECYCLED_BOTTLE
-                  </h2>
-                  <p className="text-xs text-gray-500 leading-relaxed font-sans mb-6 uppercase">
-                    THIS INTERACTIVE 3D MODEL REPRESENTS A RECYCLED PLASTIC BOTTLE ARCHETYPE (CHAI1.GLB), PROCESSED THROUGH OUR CIRCULAR FABRICATION MODULES. OPTIMIZED FOR HIGH-DEFINITION 3D RENDERING.
-                  </p>
-
-                  <div className="space-y-3">
-                    <div className="flex justify-between items-center p-3.5 bg-gray-50 border-2 border-black rounded-2xl">
-                      <span className="text-[9px] font-black text-gray-400 uppercase tracking-wider">Base Material</span>
-                      <span className="text-[10px] font-black text-[#0020D7] bg-[#A7F417] px-2.5 py-1 rounded-full border border-black font-mono">rPET / rHDPE</span>
-                    </div>
-                    <div className="flex justify-between items-center p-3.5 bg-gray-50 border-2 border-black rounded-2xl">
-                      <span className="text-[9px] font-black text-gray-400 uppercase tracking-wider">Density Code</span>
-                      <span className="text-[10px] font-black text-black font-mono">0.95 g/cm³</span>
-                    </div>
-                    <div className="flex justify-between items-center p-3.5 bg-gray-50 border-2 border-black rounded-2xl">
-                      <span className="text-[9px] font-black text-gray-400 uppercase tracking-wider">Melting Temp</span>
-                      <span className="text-[10px] font-black text-black font-mono">220°C - 250°C</span>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="pt-6 border-t-2 border-gray-100 flex flex-col gap-3">
-                  <div className="text-[8px] font-black text-gray-400 uppercase tracking-widest font-mono">
-                    * Drag mouse/touch to orbit, scroll/pinch to zoom in 3D viewport.
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </PageContainer>
-      </div>
     </div>
   );
 }

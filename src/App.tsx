@@ -1,9 +1,8 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { AnimatePresence, motion } from "motion/react";
 import Navbar from "./components/Navbar";
 import Home from "./pages/Home";
 import AboutUs from "./pages/AboutUs";
-import Communicate from "./pages/Communicate";
 import Workshop from "./pages/Workshop";
 import Material from "./pages/Material";
 import Admin from "./pages/Admin";
@@ -17,11 +16,14 @@ import LayoutGridGuide from "./components/LayoutGridGuide";
 export default function App() {
   const [activePage, setActivePage] = useState("home");
 
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [activePage]);
+
   const renderPage = () => {
     switch (activePage) {
       case "home": return <Home onNavigate={setActivePage} />;
       case "about": return <AboutUs />;
-      case "communicate": return <Communicate />;
       case "workshop": return <Workshop onNavigate={setActivePage} />;
       case "material": return <Material />;
       case "store": return <Store />;
@@ -35,9 +37,7 @@ export default function App() {
       <main className={`relative min-h-screen transition-colors duration-300 selection:bg-[#D1FF00] selection:text-black ${
         activePage === "about" ? "bg-transparent" : "bg-[#FFFFFF]"
       }`}>
-        {/* Lớp Phủ Lưới Toàn Cục */}
-        <div className="fixed inset-0 pointer-events-none z-[120] border-[20px] border-black/5"></div>
-        
+
         <Navbar activePage={activePage} onNavigate={setActivePage} />
         
         <AnimatePresence mode="wait">

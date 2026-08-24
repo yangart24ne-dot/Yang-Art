@@ -151,7 +151,7 @@ const FluidPixelText: React.FC<FluidPixelTextProps> = ({
         const distanceSq = dx * dx + dy * dy;
         const distance = Math.sqrt(distanceSq);
 
-        if (distance < mouse.current.radius) {
+        if (mouse.current.radius > 0 && distance < mouse.current.radius) {
           const force = (mouse.current.radius - distance) / mouse.current.radius;
           const forceX = dx / distance;
           const forceY = dy / distance;
@@ -224,7 +224,8 @@ const FluidPixelText: React.FC<FluidPixelTextProps> = ({
           height: '100%',
           position: 'absolute',
           top: 0,
-          left: 0
+          left: 0,
+          pointerEvents: 'none'
         }} 
       />
     </div>

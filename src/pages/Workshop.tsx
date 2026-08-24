@@ -39,11 +39,11 @@ export const WORKSHOP_ASSETS_CONFIG = {
     container: { offsetX: 0, offsetY: 0, scale: 1.0 },
 
     // 2. Chữ tiêu đề lớn (đã tách riêng "Self" và "-Designed" để chỉnh vị trí độc lập)
-    titleSelf: { offsetX: -380, offsetY: 0, scale: 1.3 },       // Chữ "Self"
-    titleDesigned: { offsetX: 240, offsetY: 0, scale: 1.3 },   // Chữ "-Designed"
+    titleSelf: { offsetX: 0, offsetY: 0, scale: 1.0 },       // Chữ "Self"
+    titleDesigned: { offsetX: 0, offsetY: 0, scale: 1.0 },   // Chữ "-Designed"
 
     // 3. Chữ phụ đề "TURNING WASTE INTO POSSIBILITY." ngay dưới Self-Designed
-    subtitleTurningWaste: { offsetX: -380, offsetY: 30, scale: 1.0 },
+    subtitleTurningWaste: { offsetX: 0, offsetY: 0, scale: 1.0 },
 
     // --- CỘT BÊN TRÁI (LEFT COLUMN) ---
     // Khung bao toàn bộ cột bên trái
@@ -99,7 +99,7 @@ export const WORKSHOP_ASSETS_CONFIG = {
     redoIcon: { offsetX: 14, offsetY: 375, scale: 1.8 },
 
     // Linh vật Mascot Yang (Asset 84.svg) ở góc trái dưới thanh công cụ
-    mascot: { offsetX: -30, offsetY: 520, scale: 3.9 },
+    mascot: { offsetX: -50, offsetY: 520, scale: 4.9 },
 
     // Gợi ý chọn hình khi chưa bắt đầu vẽ (Asset 44.svg)
     selectBasePrompt: { offsetX: 0, offsetY: 0, scale: 1.0 },
@@ -208,7 +208,7 @@ export default function Workshop({ onNavigate }: WorkshopProps) {
       {/* Workshop Page Content */}
       <PageContainer
         size="full"
-        className="pt-24 sm:pt-28 pb-[500px] relative z-10"
+        className="pt-24 sm:pt-28 pb-16 sm:pb-24 relative z-10"
       >
         <div className="relative z-10 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col gap-16">
 
@@ -465,7 +465,10 @@ art products, sustainable materials.`}
               className="w-full"
               style={{
                 transform: `translate(${WORKSHOP_ASSETS_CONFIG.viewer3d.advancedTuningCard.offsetX}px, ${WORKSHOP_ASSETS_CONFIG.viewer3d.advancedTuningCard.offsetY}px) scale(${WORKSHOP_ASSETS_CONFIG.viewer3d.advancedTuningCard.scale})`,
-                transformOrigin: 'top center'
+                transformOrigin: 'top center',
+                marginBottom: WORKSHOP_ASSETS_CONFIG.viewer3d.advancedTuningCard.offsetY > 0
+                  ? `${WORKSHOP_ASSETS_CONFIG.viewer3d.advancedTuningCard.offsetY + 40}px`
+                  : undefined
               }}
             >
               {/* Advanced 3D Tuning modifiers */}

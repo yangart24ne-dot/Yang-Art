@@ -1,6 +1,6 @@
 /**
  * ╔══════════════════════════════════════════════════════════════╗
- * ║          YANG STUDIO – Global Layout & Grid System           ║
+ * ║          RELIFE LAB – Global Layout & Grid System           ║
  * ╚══════════════════════════════════════════════════════════════╝
  *
  * Đây là nguồn duy nhất (single source of truth) cho tất cả giá trị

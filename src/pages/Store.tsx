@@ -82,7 +82,6 @@ function InteractiveProductToy3D({
   targetSize = 2.45, 
   scaleMultiplier = 1.0,
   yOffset = 0,
-  showBadge = true,
   enableZoom = false,
   autoRotateSpeed = 2.2
 }: { 
@@ -128,13 +127,6 @@ function InteractiveProductToy3D({
           maxPolarAngle={Math.PI - Math.PI / 4}
         />
       </Canvas>
-
-      {showBadge && (
-        <div className="absolute bottom-1 right-2 pointer-events-none px-2 py-0.5 rounded-full bg-black/80 backdrop-blur-md text-white font-mono text-[8.5px] font-bold uppercase tracking-wider flex items-center gap-1 shadow-sm border border-white/20 z-10">
-          <span className="w-1.5 h-1.5 rounded-full bg-[#D1FF00] animate-ping" />
-          <span>Xoay 3D 360°</span>
-        </div>
-      )}
     </div>
   );
 }
@@ -488,81 +480,93 @@ export default function Store() {
         {/* CONTAINER CHÍNH */}
         <div className="w-full max-w-[1240px] px-4 sm:px-6 lg:px-8">
 
-          {/* ── HERO HEADLINE & FLOATING SKATER BEAR ── */}
-          <div className="relative pt-6 pb-12 sm:pb-16 flex flex-col md:flex-row items-center justify-between gap-8 min-h-[460px]">
+          {/* ── HERO HEADLINE & OVERLAPPING 3D ART TOY (BỐ CỤC EDITORIAL THEO THAM CHIẾU ẢNH) ── */}
+          <div className="relative pt-2 pb-8 sm:pb-12 flex flex-col items-center justify-between min-h-[500px] sm:min-h-[560px] w-full select-none">
             
-            {/* Left Sub-caption Annotation */}
-            <div className="w-full md:w-[280px] lg:w-[320px] text-xs font-sans text-gray-600 leading-relaxed order-2 md:order-1">
-              <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-[#0020D7]/10 text-[#0020D7] font-mono text-[10px] font-bold uppercase mb-2">
-                <Sparkles size={12} /> 100% Eco-Plastic Art
-              </div>
-              <p>
-                Tại đây bạn sẽ tìm thấy các mô hình đồ chơi độc bản được đúc thủ công từ nắp chai và rác thải nhựa đại dương đã qua xử lý nhiệt độ cao.
-              </p>
+            {/* 1. HUGE DECORATIVE BACKGROUND TYPOGRAPHY (CHỮ KHỔNG LỒ NỀN PHÍA TRÊN SÁNG TẠO ĐỒ CHƠI) */}
+            <div className="w-full text-center relative z-0 pointer-events-none select-none px-2 pt-2">
+              <h1 className="font-display font-black text-5xl sm:text-7xl md:text-8xl lg:text-[120px] xl:text-[140px] text-[#FF5500] uppercase tracking-tighter leading-[0.85] whitespace-nowrap drop-shadow-sm">
+                SÁNG TẠO ĐỒ CHƠI
+              </h1>
+              <h1 className="font-display font-black text-3xl sm:text-5xl md:text-6xl lg:text-[85px] xl:text-[100px] text-[#FF009C] uppercase tracking-tighter leading-[0.9] whitespace-nowrap mt-1">
+                & NGHỆ THUẬT TÁI SINH
+              </h1>
             </div>
 
-            {/* Center / Right: Big Organic Playful Headline with Looping Arrow & Mascot */}
-            <div className="relative flex-1 flex flex-col items-center md:items-end justify-center w-full order-1 md:order-2">
+            {/* 2. OVERLAPPING CENTER 3D TOY CHARACTER (MÔ HÌNH 3D ĐÈ CHÍNH GIỮA LÊN CHỮ KHỔNG LỒ) */}
+            <div className="absolute top-[38%] sm:top-[40%] left-1/2 -translate-x-1/2 -translate-y-1/2 w-[280px] sm:w-[360px] md:w-[420px] h-[280px] sm:h-[360px] md:h-[400px] flex items-center justify-center z-20 pointer-events-auto">
+              {/* Soft Flower Blob Background đằng sau ArtToy (như trong ảnh mẫu) */}
+              <svg
+                viewBox="0 0 200 200"
+                className="absolute inset-0 w-full h-full pointer-events-none scale-125 opacity-25"
+                fill="#FFB0D0"
+              >
+                <path d="M48,-62C61,-53,70,-38,74,-22C78,-6,77,11,70,25C63,39,50,50,36,58C22,66,7,71,-9,72C-25,73,-41,70,-53,60C-65,50,-73,33,-75,16C-77,-1,-73,-18,-64,-32C-55,-46,-41,-57,-26,-65C-11,-73,6,-78,22,-74C38,-70,35,-71,48,-62Z" transform="translate(100 100)" />
+              </svg>
+
+              {/* 3D Canvas Model Viewer */}
+              <div className="relative z-10 w-full h-full">
+                <InteractiveProductToy3D
+                  modelUrl={toychaiModel}
+                  targetSize={3.0}
+                />
+              </div>
+            </div>
+
+            {/* 3. SIDE ANNOTATIONS & CTA BUTTON (CÁC THÔNG TIN & NÚT BẤM HAI BÊN THEO ẢNH MẪU) */}
+            <div className="w-full relative z-30 pointer-events-auto mt-auto pt-24 sm:pt-28 md:pt-32">
               
-              {/* Playful Floating 3D Interactive Toy Character with Background Organic Flower Blob */}
-              <div className="relative w-[280px] sm:w-[340px] md:w-[380px] h-[260px] sm:h-[300px] md:h-[340px] flex items-center justify-center z-10">
-                {/* Yellow Organic Flower Blob SVG (Giống hệt ảnh mẫu) */}
-                <svg
-                  viewBox="0 0 200 200"
-                  className="absolute inset-0 w-full h-full pointer-events-none"
-                  fill={BRAND_SECONDARY.yellow}
-                >
-                  <path d="M48,-62C61,-53,70,-38,74,-22C78,-6,77,11,70,25C63,39,50,50,36,58C22,66,7,71,-9,72C-25,73,-41,70,-53,60C-65,50,-73,33,-75,16C-77,-1,-73,-18,-64,-32C-55,-46,-41,-57,-26,-65C-11,-73,6,-78,22,-74C38,-70,35,-71,48,-62Z" transform="translate(100 100)" />
-                </svg>
-
-                {/* 3D Canvas Interactive Model Viewer */}
-                <div className="relative z-10 w-full h-full">
-                  <InteractiveProductToy3D
-                    modelUrl={toychaiModel}
-                    targetSize={2.85}
-                    showBadge={true}
-                  />
+              {/* Top-Left Caption Note */}
+              <div className="hidden md:block absolute -top-44 lg:-top-52 left-0 max-w-[230px] text-left">
+                <span className="font-mono text-[10px] text-gray-400 uppercase tracking-widest block font-bold mb-1">
+                  Chế tác thủ công // Từ 2026
+                </span>
+                <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-[#0020D7]/10 text-[#0020D7] font-mono text-[10px] font-bold uppercase">
+                  <Sparkles size={12} /> 100% Eco-Plastic Art
                 </div>
               </div>
 
-              {/* Huge Playful Typography with Hand-drawn Looping Arrow */}
-              <div className="relative text-center md:text-right mt-2 z-20">
-                {/* Curved Arrow SVG */}
-                <div className="absolute -top-12 sm:-top-16 right-0 sm:right-4 pointer-events-none w-24 sm:w-32 h-24 sm:h-32 text-[#FFDE00]">
-                  <svg viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full h-full stroke-current">
-                    <path
-                      d="M20,90 C45,110 90,85 75,40 C65,10 20,30 50,70 C70,95 105,45 105,25"
-                      strokeWidth="6"
-                      strokeLinecap="round"
-                      fill="none"
-                    />
-                    <path
-                      d="M85,22 L105,25 L108,45"
-                      strokeWidth="6"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    />
-                  </svg>
+              {/* Top-Right Subtext */}
+              <div className="hidden md:block absolute -top-44 lg:-top-52 right-0 max-w-[260px] text-right">
+                <p className="font-sans text-xs text-gray-600 leading-relaxed font-medium">
+                  Mô hình đồ chơi độc bản đúc nhiệt nguyên khối từ nắp chai nhựa & rác thải đại dương.
+                </p>
+              </div>
+
+              {/* Middle-Left Action Pill Box & Button */}
+              <div className="flex flex-col md:flex-row items-center md:items-end justify-between gap-6 w-full">
+                
+                {/* Left Side Pill Callout CTA Button */}
+                <div className="max-w-[300px] text-left">
+                  <p className="font-sans text-xs text-gray-700 leading-relaxed font-medium mb-3">
+                    Các mô hình đồ chơi tái sinh độc bản sở hữu sắc màu ngẫu nhiên & chip NFC bảo chứng On-Chain.
+                  </p>
+                  <button 
+                    onClick={scrollToTunnel}
+                    className="inline-flex items-center gap-2 px-6 py-2.5 rounded-full bg-[#FF009C] text-white font-mono text-xs font-black uppercase tracking-wider shadow-[3px_3px_0px_#000000] hover:bg-[#0020D7] hover:scale-105 transition-all cursor-pointer border-2 border-black"
+                  >
+                    <span>+ KHÁM PHÁ BỘ SƯU TẬP</span>
+                  </button>
                 </div>
 
-                <h2 className="font-display font-black text-4xl sm:text-5xl lg:text-6xl text-[#FF5500] uppercase tracking-tight leading-[1.05]">
-                  Sáng tạo đồ chơi
-                </h2>
-                <h2 className="font-display font-black text-3xl sm:text-4xl lg:text-5xl text-[#FF009C] uppercase tracking-tight leading-[1.1] mt-1">
-                  & Nghệ thuật tái sinh
-                </h2>
+                {/* Mobile layout caption */}
+                <div className="block md:hidden text-center text-xs text-gray-500 font-mono">
+                  RELIFE LAB // ECO PLASTIC TOY SERIES
+                </div>
+
               </div>
             </div>
+
           </div>
         </div>
 
         {/* ═══════════════════════════════════════════════════════════
-            WAVE CARD SECTION (NỀN VÀNG THƯƠNG HIỆU #FFDE00)
+            WAVE CARD SECTION (NỀN XANH DƯƠNG THƯƠNG HIỆU #0020D7)
         ═══════════════════════════════════════════════════════════ */}
-        {/* 🟡 [1. VỊ TRÍ TOÀN KHU VỰC NỀN VÀNG]: pt-16 (khoảng cách trên), pb-0 (khoảng cách dưới), px-4 (lề hai bên) */}
+        {/* 🔵 [1. VỊ TRÍ TOÀN KHU VỰC NỀN XANH DƯƠNG]: pt-16 (khoảng cách trên), pb-0 (khoảng cách dưới), px-4 (lề hai bên) */}
         <div 
           className="relative w-full pt-14 sm:pt-16 pb-0 px-4 sm:px-6 lg:px-8 flex flex-col items-center shadow-inner"
-          style={{ backgroundColor: BRAND_SECONDARY.yellow }}
+          style={{ backgroundColor: BRAND.blue }}
         >
           {/* Top Wavy SVG Mask Edge (Hiệu ứng sóng lượn viền trên) */}
           <div className="absolute top-0 left-0 right-0 w-full overflow-hidden leading-none z-10 -translate-y-[99%]">
@@ -570,21 +574,21 @@ export default function Store() {
               viewBox="0 0 1200 120"
               preserveAspectRatio="none"
               className="relative block w-full h-10 sm:h-16 lg:h-20"
-              fill={BRAND_SECONDARY.yellow}
+              fill={BRAND.blue}
             >
               <path d="M0,0 C150,90 350,-40 500,45 C650,130 900,10 1200,60 L1200,120 L0,120 Z" />
             </svg>
           </div>
 
-          {/* 🟡 [2. VỊ TRÍ KHUNG NỘI DUNG CHÍNH (MAX WIDTH 1240PX)] */}
+          {/* 🔵 [2. VỊ TRÍ KHUNG NỘI DUNG CHÍNH (MAX WIDTH 1240PX)] */}
           <div className="w-full max-w-[1240px] relative z-20">
             
-            {/* 🟡 [3. VỊ TRÍ TIÊU ĐỀ SECTION & MÔ TẢ PHỤ BÊN PHẢI]: mb-6 (khoảng cách với thanh tab phía dưới) */}
+            {/* 🔵 [3. VỊ TRÍ TIÊU ĐỀ SECTION & MÔ TẢ PHỤ BÊN PHẢI]: mb-6 (khoảng cách với thanh tab phía dưới) */}
             <div className="flex flex-col md:flex-row items-start md:items-end justify-between gap-4 mb-4 sm:mb-6">
               <div>
                 {/* 3.1. Dòng chữ nhỏ bên trên tiêu đề */}
-                <span className="font-mono text-xs text-black/70 font-bold uppercase tracking-widest block mb-1">
-                  YANG STUDIO COLLECTIBLE SERIES
+                <span className="font-mono text-xs text-white/80 font-bold uppercase tracking-widest block mb-1">
+                  RELIFE LAB COLLECTIBLE SERIES
                 </span>
                 {/* 3.2. Tiêu đề lớn BỘ SƯU TẬP ĐẶC BIỆT */}
                 <h3 className="font-display font-black text-3xl sm:text-4xl lg:text-5xl uppercase tracking-tight text-white drop-shadow-[2px_2px_0px_#000000]">
@@ -593,7 +597,7 @@ export default function Store() {
               </div>
 
               {/* 3.3. Đoạn mô tả phụ bên phải: w-[340px] (độ rộng khối text) */}
-              <div className="w-full md:w-[340px] text-xs font-sans text-black/80 font-medium leading-relaxed">
+              <div className="w-full md:w-[340px] text-xs font-sans text-white/90 font-medium leading-relaxed">
                 Mỗi mô hình đều được tích hợp chip NFC xác thực chuỗi cung ứng nhựa, số series đúc thủ công và chứng nhận tái chế On-Chain.
               </div>
             </div>
@@ -768,7 +772,7 @@ export default function Store() {
           <div className="w-full max-w-[1240px] mt-16 sm:mt-24">
             <div className="relative bg-[#FFFFFF] rounded-t-[80px] sm:rounded-t-[140px] md:rounded-t-[180px] pt-12 sm:pt-16 pb-14 px-6 sm:px-12 text-center shadow-xl border-t-2 border-black/5 flex flex-col items-center">
               <h3 className="font-display font-black text-2xl sm:text-4xl lg:text-5xl text-[#FF5500] uppercase tracking-tight max-w-[800px] leading-snug mb-3">
-                Tham gia cùng YANG STUDIO kiến tạo thế giới xanh & mở ra vũ trụ đồ chơi tái chế!
+                Tham gia cùng RELIFE LAB kiến tạo thế giới xanh & mở ra vũ trụ đồ chơi tái chế!
               </h3>
               <p className="font-sans text-xs sm:text-sm text-gray-600 max-w-[580px] mb-8">
                 Mỗi mảnh ghép là một hành trình tái sinh, kết hợp sự tỉ mỉ của nghệ nhân và công nghệ đúc nén hạt nhựa nguyên chất.
@@ -807,7 +811,7 @@ export default function Store() {
             KINETIC<br />TUNNEL_V2
           </h2>
           <p className="font-mono text-[11px] text-gray-400 uppercase tracking-widest max-w-xs leading-relaxed">
-            Cuộn chuột để bay xuyên đường hầm • Kéo thả chuột để xoay camera 360°
+            Cuộn chuột để bay xuyên đường hầm • Kéo thả chuột để điều khiển góc nhìn
           </p>
         </div>
 

@@ -30,7 +30,6 @@ const NAV_ITEMS = [
   { id: "material", label: "MATERIAL" },
   { id: "workshop", label: "WORKSHOP" },
   { id: "store", label: "STORE" },
-  { id: "communicate", label: "COMMUNICATE" },
 ] as const;
 
 // CẤU HÌNH NAVBAR CHUNG
@@ -98,9 +97,8 @@ export default function Navbar({ activePage, onNavigate }: NavbarProps) {
                 <button
                   key={item.id}
                   onClick={() => onNavigate(item.id)}
-                  style={{ paddingLeft: NAV_CONFIG.px, paddingRight: NAV_CONFIG.px }}
                   className={cn(
-                    "h-full font-display font-bold transition-all flex items-center gap-2 relative group uppercase overflow-hidden",
+                    "h-full px-3.5 xl:px-6 font-display font-bold transition-all flex items-center gap-2 relative group uppercase overflow-hidden text-[13px] xl:text-[14px] tracking-[0.08em]",
                     activePage === item.id
                       ? isAboutPage
                         ? "text-[#FF009C]"
@@ -110,7 +108,7 @@ export default function Navbar({ activePage, onNavigate }: NavbarProps) {
                         : "text-[#0020D7]/50 hover:text-[#FF009C]"
                   )}
                 >
-                  <span style={{ fontSize: NAV_CONFIG.fontSize, letterSpacing: NAV_CONFIG.letterSpacing }}>
+                  <span>
                     {item.label}
                   </span>
 

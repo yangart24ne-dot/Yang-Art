@@ -327,12 +327,14 @@
 }
 
 @layer base {
-  body {
+  html, body {
     /* Nền trắng, chữ đen, font AnekDevanagari — đúng quy định thương hiệu */
     background-color: var(--color-brand-white);
     color: var(--color-brand-black);
     font-family: var(--font-sans);
     overflow-x: hidden;
+    max-width: 100vw;
+    width: 100%;
   }
 
   ::selection {
@@ -518,7 +520,7 @@
 /* ── Workshop Viewport Auto-Fitting Zoom ── */
 @media (min-width: 1024px) {
   .workshop-viewport {
-    zoom: 0.9;
+    zoom: 0.85;
     transform-origin: top center;
   }
 }

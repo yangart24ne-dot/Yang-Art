@@ -29,20 +29,20 @@ export interface FluidEffectSettings {
 const DEFAULT_SETTINGS: FluidEffectSettings = {
   gradientToggle: true,
   colors: ["#A7F417", "#FF009E"], // brand màu Chuẩn (xanh lá và hồng)
-  radius: 0.25,             // 🎯 Bán kính tác động của chuột (Mặc định: 0.45, giảm xuống giúp vệt chảy gọn sát chuột)
-  distortionStrength: 0.12, // 🎯 Độ mạnh của biến dạng co giãn (Mặc định: 0.35, giảm xuống giúp chữ ít bị loang to)
+  radius: 0.0,              // 🎯 Tắt bán kính tác động của chuột (để chữ luôn giữ nguyên hình dáng)
+  distortionStrength: 0.0,  // 🎯 Tắt biến dạng co giãn / tan chảy
   hueShift: 0.0,
   colorSpeed: 1.2,
-  animationSpeed: 0.5,      // ⚡ TỐC ĐỘ CHUYỂN ĐỘNG CỦA DÒNG CHẢY (Mặc định: 1.0, tăng lên sẽ chạy nhanh hơn) 
-  glowSpread: 0.2,          // 🌸 ĐỘ LOANG CỦA ÁNH SÁNG PHÁT SÁNG (Mặc định: 1.0, tăng lên loang rộng hơn)
-  glowIntensity: 0.20,      // ✨ ĐỘ SÁNG CỦA HÀO QUANG (Mặc định: 0.45, giảm xuống giúp hào quang dịu nhẹ và sát chữ) 
+  animationSpeed: 0.5,      
+  glowSpread: 0.2,          
+  glowIntensity: 0.20,      
   trailPersistence: 0.05,
   pointerSmoothing: 0.85,
   overflowPadding: 0.15,
   highQuality: true,
   fadeInDuration: 0.8,
   maxDPR: 2,
-  reducedMotion: false,
+  reducedMotion: true,     // Tắt di chuyển biến dạng chuột
 };
 
 interface FluidTextEffectProps {
@@ -278,56 +278,19 @@ export default function FluidTextEffect({
   // 🖱️ MOUSE EVENT HANDLERS (ON WRAPPER DIV)
   // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
   const handlePointerEnter = () => {
-    if (!hasWebGL) return;
-    if (!isInteracting) {
-      if (activeWebGLCount >= MAX_CONCURRENT_WEBGL) return;
-      setIsInteracting(true);
-      activeWebGLCount++;
-    }
-    stateRef.current.isHovered = true;
+    // Disabled all hover interactions as requested
   };
 
   const handlePointerLeave = () => {
-    stateRef.current.isHovered = false;
+    // Disabled all hover interactions as requested
   };
 
-  const handlePointerMove = (e: React.PointerEvent<HTMLDivElement>) => {
-    if (!hasWebGL) return;
-    if (!isInteracting) {
-      if (activeWebGLCount >= MAX_CONCURRENT_WEBGL) return;
-      setIsInteracting(true);
-      activeWebGLCount++;
-    }
-    stateRef.current.isHovered = true;
-
-    const rect = e.currentTarget.getBoundingClientRect();
-    const padX = 150;
-    const padY = 150;
-    const totalW = rect.width + padX * 2;
-    const totalH = letterHeight + padY * 2;
-    const x = ((e.clientX - rect.left) + padX) / totalW;
-    const y = 1.0 - ((e.clientY - rect.top) + padY) / totalH; // invert for WebGL coordinates
-    stateRef.current.targetMouse.set(x, y);
+  const handlePointerMove = (_e: React.PointerEvent<HTMLDivElement>) => {
+    // Disabled all hover interactions as requested
   };
 
-  const handleClick = (e: React.MouseEvent<HTMLDivElement>) => {
-    if (!hasWebGL) return;
-    if (!isInteracting) {
-      if (activeWebGLCount >= MAX_CONCURRENT_WEBGL) return;
-      setIsInteracting(true);
-      activeWebGLCount++;
-    }
-    const rect = e.currentTarget.getBoundingClientRect();
-    const padX = 150;
-    const padY = 150;
-    const totalW = rect.width + padX * 2;
-    const totalH = letterHeight + padY * 2;
-    const x = ((e.clientX - rect.left) + padX) / totalW;
-    const y = 1.0 - ((e.clientY - rect.top) + padY) / totalH;
-
-    const state = stateRef.current;
-    state.clickPos.set(x, y);
-    state.clickTime = state.time;
+  const handleClick = (_e: React.MouseEvent<HTMLDivElement>) => {
+    // Disabled all hover interactions as requested
   };
 
   useEffect(() => {
@@ -706,17 +669,10 @@ export default function FluidTextEffect({
       onPointerLeave={handlePointerLeave}
       onPointerMove={handlePointerMove}
       onClick={handleClick}
-      className={`relative w-full overflow-visible flex items-center justify-center cursor-pointer ${className}`}
+      className={`relative w-full overflow-visible flex items-center justify-center cursor-default select-none ${className}`}
       style={{ height: `${letterHeight}px`, zIndex: 1 }}
     >
-      {/* WebGL Canvas layer for fluid liquid distortion */}
-      <canvas
-        ref={canvasRef}
-        className="absolute pointer-events-none z-10"
-        style={{ display: isInteracting && hasWebGL ? 'block' : 'none' }}
-      />
-
-      {/* Clean, crisp static typography fallback / base layer */}
+      {/* Clean, crisp static typography base layer */}
       <span
         ref={spanRef}
         className="font-display font-black uppercase block w-full text-center select-none"
@@ -726,8 +682,7 @@ export default function FluidTextEffect({
           letterSpacing: "-0.04em",
           color: textColor,
           paddingTop: `${paddingTop}px`,
-          opacity: isInteracting && hasWebGL ? 0 : 1,
-          transition: "opacity 0.2s ease",
+          opacity: 1,
         }}
       >
         {text}

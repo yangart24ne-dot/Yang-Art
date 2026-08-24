@@ -8,18 +8,14 @@ import img8 from '../assets/anhonhiem/o8.jpg';
 import {
   Plus,
   Recycle,
-  Award,
-  Newspaper,
-  Hammer,
-  Download,
-  Users,
-  ShoppingBag,
+  AlertTriangle,
+  Trash2,
+  Layers,
+  Sparkles,
   ArrowUpRight,
   ArrowRight,
   MapPin,
-  Zap,
-  Activity,
-  Globe
+  Hammer
 } from "lucide-react";
 
 import PlasticWasteScroll from "../components/PlasticWasteScroll";
@@ -215,166 +211,277 @@ export default function Home({ onNavigate }: HomeProps) {
           {/* Lưới Mô-đun */}
           <div className="grid grid-cols-1 md:grid-cols-12 gap-6">
 
-            {/* Mô-đun A: Tác Động Thời Gian Thực */}
+            {/* Mô-đun 1: Ô lớn nhất — THỰC TRẠNG RÁC THẢI NHỰA */}
             <IndustrialContainer
-              title="REAL_TIME_IMPACT_DATA"
+              title="VIETNAM_PLASTIC_WASTE"
               className="md:col-span-8"
               onClick={() => onNavigate("about")}
               delay={0.1}
             >
-              <div className="flex flex-col md:flex-row justify-between items-end gap-8 flex-1">
-                <div className="flex-1">
-                  <div className="flex items-center gap-4 mb-2">
-                    <Recycle className="text-[#0020D7]" size={32} strokeWidth={2.5} />
-                    <h2 className="font-display text-4xl md:text-6xl tracking-tighter uppercase leading-none">
-                      TOTAL_PLASTIC<br />SAVED
-                    </h2>
+              <div className="flex flex-col justify-between h-full gap-6">
+                <div>
+                  <div className="flex items-center gap-3 mb-2">
+                    <Recycle className="text-[#0020D7]" size={28} strokeWidth={2.5} />
+                    <span className="font-mono text-xs uppercase tracking-widest text-[#0020D7] font-bold">
+                      TOTAL PLASTIC WASTE
+                    </span>
                   </div>
-                  <div className="lcd-text text-4xl sm:text-7xl md:text-9xl text-black font-black tracking-tighter mt-4">
-                    450,231<span className="text-xl sm:text-2xl ml-2 text-gray-400 font-sans">KG</span>
+                  
+                  {/* Con số 3.1 MILLION làm visual chính siêu lớn */}
+                  <div className="lcd-text text-5xl sm:text-7xl md:text-8xl font-black tracking-tighter text-black leading-none my-2">
+                    3.1 MILLION <span className="text-xl sm:text-3xl font-sans text-gray-500 font-bold tracking-normal">TONNES</span>
                   </div>
+                  
+                  <p className="font-mono text-xs sm:text-sm text-gray-600 font-medium">
+                    Plastic waste generated on land in Vietnam every year.
+                  </p>
                 </div>
 
-                <div className="w-full md:w-64 h-32 bg-[#0020D7]/10 border border-[#0020D7]/20 p-4 flex flex-col justify-between">
-                  <div className="flex justify-between items-center font-mono text-[8px] text-black/60">
-                    <span>COLLECTION_POINTS: 142</span>
-                    <span>ACTIVE_HUBS: 12</span>
+                {/* 4 Số liệu nhỏ */}
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-4 border-t border-black/10">
+                  <div className="bg-[#0020D7]/5 border border-[#0020D7]/20 p-3 flex flex-col justify-between min-h-[90px]">
+                    <div className="font-display text-2xl sm:text-3xl text-[#0020D7] font-black">≥10%</div>
+                    <p className="font-mono text-[9px] sm:text-[10px] text-gray-600 leading-tight mt-1">
+                      Plastic waste that may leak into the ocean.
+                    </p>
                   </div>
-                  <div className="flex items-end gap-1 h-12">
-                    {[40, 60, 45, 70, 85, 90, 85].map((h, i) => (
-                      <motion.div
-                        key={i}
-                        initial={{ height: 0 }}
-                        animate={{ height: `${h}%` }}
-                        className={cn("flex-1 border-t border-x border-black", i === 6 ? "bg-[#0020D7]" : "bg-black")}
-                      />
-                    ))}
+
+                  <div className="bg-[#0020D7]/5 border border-[#0020D7]/20 p-3 flex flex-col justify-between min-h-[90px]">
+                    <div className="font-display text-2xl sm:text-3xl text-[#0020D7] font-black">94%</div>
+                    <p className="font-mono text-[9px] sm:text-[10px] text-gray-600 leading-tight mt-1">
+                      Plastic items recorded in surveyed river and coastal areas.
+                    </p>
                   </div>
-                  <div className="font-mono text-[8px] text-black">
-                    THROUGHPUT: 1.2T/HR // OPTIMAL
+
+                  <div className="bg-[#0020D7]/5 border border-[#0020D7]/20 p-3 flex flex-col justify-between min-h-[90px]">
+                    <div className="font-display text-2xl sm:text-3xl text-[#0020D7] font-black">71%</div>
+                    <p className="font-mono text-[9px] sm:text-[10px] text-gray-600 leading-tight mt-1">
+                      Share of plastic by weight in recorded waste.
+                    </p>
+                  </div>
+
+                  <div className="bg-[#0020D7]/5 border border-[#0020D7]/20 p-3 flex flex-col justify-between min-h-[90px]">
+                    <div className="font-display text-2xl sm:text-3xl text-[#0020D7] font-black">33%</div>
+                    <p className="font-mono text-[9px] sm:text-[10px] text-gray-600 leading-tight mt-1">
+                      Estimated recycling rate for PET, HDPE, LDPE/LLDPE, PP.
+                    </p>
                   </div>
                 </div>
               </div>
             </IndustrialContainer>
 
-            {/* Mô-đun B: Chương Trình Đối Tác */}
-            <IndustrialContainer title="PARTNERSHIP_PROGRAM" className="md:col-span-4" delay={0.2}>
-              <div className="flex flex-col h-full justify-between">
-                <div className="flex items-center gap-4 mb-6">
-                  <div className="w-16 h-16 bg-black flex items-center justify-center border-2 border-black">
-                    <Award className="text-[#FF009C]" size={32} />
+            {/* Mô-đun 2: Ô bên phải — NGUY CƠ */}
+            <IndustrialContainer title="ENVIRONMENTAL_THREAT" className="md:col-span-4" delay={0.2}>
+              <div className="flex flex-col h-full justify-between gap-4">
+                <div className="flex items-start gap-4">
+                  <div className="w-12 h-12 bg-black flex items-center justify-center border-2 border-black shrink-0">
+                    <AlertTriangle className="text-[#FF009C]" size={26} />
                   </div>
                   <div>
-                    <h3 className="font-display text-xl leading-none uppercase">HONORABLE<br />BADGE 2024</h3>
-                    <span className="font-mono text-[8px] text-gray-400">VERIFIED_BY_ENVIRONMENT_SYS</span>
+                    <h3 className="font-display text-xl leading-tight uppercase font-bold text-black">
+                      PLASTIC WASTE IS A GROWING THREAT
+                    </h3>
+                    <p className="font-mono text-xs text-gray-600 mt-2 leading-relaxed">
+                      Single-use plastics continue to enter Vietnam's rivers, waterways and oceans.
+                    </p>
                   </div>
                 </div>
 
-                <div className="bg-[#0020D7]/10 p-4 border border-[#0020D7]/20 overflow-hidden">
-                  <motion.div
-                    animate={{ x: [0, -200] }}
-                    transition={{ duration: 10, repeat: Infinity, ease: "linear" }}
-                    className="flex gap-8 items-center grayscale opacity-50 font-display text-xs"
-                  >
-                    <span>HIGHLANDS_COFFEE</span>
-                    <span>ADIDAS_ORIGINALS</span>
-                    <span>UNILEVER_GLOBAL</span>
-                    <span>NESTLE_HEALTH</span>
-                  </motion.div>
+                {/* Flow nhấn mạnh */}
+                <div className="bg-[#FF009C]/10 p-3 border border-[#FF009C]/30 my-2">
+                  <span className="font-mono text-[9px] uppercase tracking-widest text-gray-500 block mb-2 font-semibold">
+                    IMPACT CHAIN
+                  </span>
+                  <div className="flex flex-wrap items-center gap-1.5 font-mono text-[10px] font-bold text-black">
+                    <span className="bg-white px-2 py-0.5 border border-black">PLASTIC</span>
+                    <span className="text-[#FF009C]">→</span>
+                    <span className="bg-white px-2 py-0.5 border border-black">WASTE</span>
+                    <span className="text-[#FF009C]">→</span>
+                    <span className="bg-white px-2 py-0.5 border border-black">LEAKAGE</span>
+                    <span className="text-[#FF009C]">→</span>
+                    <span className="bg-black text-white px-2 py-0.5">ENVIRONMENTAL IMPACT</span>
+                  </div>
                 </div>
 
-                <div className="mt-6 font-mono text-[10px] text-gray-500">
-                  JOIN_THE_NETWORK: 142_PARTNERS
+                <div className="flex items-center gap-2 font-mono text-[10px] text-gray-500">
+                  <Recycle size={14} className="text-[#FF009C]" />
+                  <span>ECOSYSTEM_ALERT // URGENT_ACTION</span>
                 </div>
               </div>
             </IndustrialContainer>
 
-            {/* Mô-đun C: Luồng Biến Đổi */}
+            {/* Mô-đun 3: Ô bên trái phía dưới — HÀNH TRÌNH TÁI SINH */}
             <IndustrialContainer
-              title="TRANSFORMATION_FLOW_V.2"
+              title="THE_REBIRTH_PROCESS"
               className="md:col-span-4"
               onClick={() => onNavigate("workshop")}
               delay={0.3}
             >
-              <div className="space-y-6">
+              <div className="space-y-4">
+                <h3 className="font-display text-xl uppercase font-bold mb-3">THE REBIRTH PROCESS</h3>
                 {[
-                  { id: "01", label: "PREPARATION", status: "DONE", icon: Hammer },
-                  { id: "02", label: "PILOT_STAGE", status: "ACTIVE", icon: Recycle },
-                  { id: "03", label: "SUBSCRIBE", status: "PENDING", icon: Users },
+                  { id: "01", label: "COLLECT", desc: "Plastic waste is collected.", icon: Trash2 },
+                  { id: "02", label: "SORT", desc: "Plastic is sorted by material.", icon: Layers },
+                  { id: "03", label: "REFORM", desc: "Waste plastic is transformed into new material.", icon: Hammer },
+                  { id: "04", label: "RECREATE", desc: "The material becomes a new product.", icon: Sparkles },
                 ].map((step, i) => (
-                  <div key={i} className="flex items-center gap-4 group/step">
+                  <div key={i} className="flex items-start gap-3 group/step">
                     <div className={cn(
-                      "w-10 h-10 flex items-center justify-center brutalist-border",
-                      step.status === 'ACTIVE' ? 'bg-[#FF009C] text-white' : step.status === 'DONE' ? 'bg-black text-white' : 'bg-white'
+                      "w-8 h-8 shrink-0 flex items-center justify-center brutalist-border mt-0.5",
+                      i === 2 ? 'bg-[#FF009C] text-white' : i === 3 ? 'bg-[#0020D7] text-white' : 'bg-black text-white'
                     )}>
-                      <step.icon size={18} />
+                      <step.icon size={14} />
                     </div>
                     <div className="flex-1 border-b border-black/10 pb-2">
-                      <div className="flex justify-between items-center">
-                        <span className="font-display text-lg uppercase">{step.id}. {step.label}</span>
-                        <span className={cn(
-                          "font-mono text-[8px]",
-                          step.status === 'ACTIVE' ? 'text-[#FF009C] bg-black px-1' : 'text-gray-400'
-                        )}>{step.status}</span>
+                      <div className="font-display text-sm uppercase font-bold">
+                        {step.id}. {step.label}
                       </div>
+                      <p className="font-mono text-[10px] text-gray-500 mt-0.5">{step.desc}</p>
                     </div>
                   </div>
                 ))}
               </div>
             </IndustrialContainer>
 
-            {/* Mô-đun D: Tin Tức & Truyền Thông */}
+            {/* Mô-đun 4 & 5: Ô hình ảnh & Ô câu chuyện sản phẩm */}
             <div className="md:col-span-8 grid grid-cols-1 md:grid-cols-2 gap-6">
-              <IndustrialContainer title="NEWS_MEDIA_01" onClick={() => onNavigate("communicate")} delay={0.4}>
-                <div className="aspect-video bg-[#0020D7]/10 mb-4 overflow-hidden brutalist-border relative">
-                  <img
-                    src={img1}
-                    className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-500"
-                  />
-                  <div className="absolute top-2 right-2 bg-[#FF009C] text-white font-mono text-[8px] px-2 py-1 brutalist-border">
-                    NEW_REPORT
-                  </div>
-                </div>
+              
+              {/* Mô-đun 4: Ô hình ảnh — KHÁM PHÁ CHẤT LIỆU */}
+              <IndustrialContainer 
+                title="FROM_WASTE_TO_MATERIAL" 
+                delay={0.4}
+                onClick={() => onNavigate("material")}
+              >
+                <div className="flex flex-col h-full justify-between">
+                  <div>
+                    <div className="aspect-video bg-[#0020D7]/10 mb-3 overflow-hidden brutalist-border relative">
+                      <img
+                        src={img1}
+                        alt="Recycled plastic material"
+                        className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-500"
+                      />
+                      <div className="absolute top-2 right-2 bg-[#0020D7] text-white font-mono text-[8px] px-2 py-1 brutalist-border font-bold">
+                        MATERIAL_TECH
+                      </div>
+                    </div>
 
-                <h4 className="font-display text-2xl uppercase leading-tight">THE FUTURE OF CIRCULAR ARCHITECTURE</h4>
-                <div className="mt-auto pt-4 flex justify-between items-center font-mono text-[8px] text-gray-400">
-                  <span>03.04.2026</span>
-                  <span>READ_MORE →</span>
+                    <h4 className="font-display text-xl uppercase leading-tight font-bold mb-2">
+                      FROM WASTE TO MATERIAL
+                    </h4>
+                    <div className="font-mono text-[10px] font-semibold text-gray-700 bg-gray-100 p-2 border border-black/10">
+                      PET → RECYCLED PLASTIC → 3D PRINTING → NEW OBJECT
+                    </div>
+                  </div>
+
+                  <div className="pt-4 flex justify-between items-center font-mono text-xs font-bold text-[#0020D7] group-hover:translate-x-1 transition-transform">
+                    <span>EXPLORE MATERIALS</span>
+                    <span>→</span>
+                  </div>
                 </div>
               </IndustrialContainer>
 
-              <IndustrialContainer title="NEWS_MEDIA_02" onClick={() => onNavigate("communicate")} delay={0.5}>
-                <div className="flex flex-col h-full">
-                  <h4 className="font-display text-4xl uppercase leading-none mb-4">DISTRICT 7 HUB: CAPACITY DOUBLED</h4>
-                  <p className="font-mono text-xs text-gray-500 mb-6">OPERATIONS_SYS: New machinery installed at the main processing facility.</p>
-                  <div className="mt-auto flex justify-between items-center font-mono text-[8px] text-gray-400">
-                    <span>01.04.2026</span>
-                    <span>READ_MORE →</span>
+              {/* Mô-đun 5: Ô bên phải — CÂU CHUYỆN SẢN PHẨM */}
+              <IndustrialContainer 
+                title="PRODUCT_STORY" 
+                delay={0.5}
+                onClick={() => onNavigate("about")}
+              >
+                <div className="flex flex-col h-full justify-between">
+                  <div>
+                    <h4 className="font-display text-2xl sm:text-3xl uppercase leading-none mb-4 font-bold text-black">
+                      EVERY PIECE DESERVES A SECOND LIFE
+                    </h4>
+                    <p className="font-mono text-xs text-gray-600 leading-relaxed mb-6">
+                      What was once plastic waste can become a new object, a new story and a new experience.
+                    </p>
+                  </div>
+
+                  <div className="pt-4 border-t border-black/10 flex justify-between items-center font-mono text-xs font-bold text-[#FF009C] group-hover:translate-x-1 transition-transform">
+                    <span>DISCOVER THE STORY</span>
+                    <span>→</span>
                   </div>
                 </div>
               </IndustrialContainer>
             </div>
 
-            {/* Hành Động Nhanh */}
+            {/* Mô-đun 6: 4 Ô CTA PHÍA DƯỚI */}
             <div className="md:col-span-12 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6 items-stretch">
-              <button className="bg-black text-white p-8 brutalist-border hover:bg-[#0020D7] hover:text-white transition-all flex flex-col justify-between text-left group min-h-[140px]">
-                <Download size={24} className="group-hover:translate-y-1 transition-transform text-[#0020D7]" />
-                <span className="font-display text-2xl uppercase leading-none">DOWNLOAD<br />GUIDE.PDF</span>
-              </button>
-              <button className="bg-white text-black p-8 brutalist-border hover:bg-[#FF009C] hover:text-white transition-all flex flex-col justify-between text-left group min-h-[140px]">
-                <ShoppingBag size={24} className="group-hover:scale-110 transition-transform text-[#FF009C]" />
-                <span className="font-display text-2xl uppercase leading-none">BUY<br />MATERIALS</span>
-              </button>
-              <NeubrutalismButton
-                label="JOIN_THE_PARTNERSHIP_NETWORK"
-                color="#0020D7"
-                fontColor="#FFFFFF"
-                className="col-span-1 sm:col-span-2 md:col-span-2 w-full h-full"
-                padding="1.5rem 1.5rem"
-                onClick={() => { }}
+              
+              {/* 01 — EXPLORE PRODUCTS */}
+              <button
+                onClick={() => onNavigate("store")}
+                className="bg-white text-black p-6 brutalist-border hover:bg-black hover:text-white transition-all flex flex-col justify-between text-left group min-h-[160px]"
               >
-                <ArrowRight size={32} className="group-hover:translate-x-2 transition-transform ml-4 flex-shrink-0 text-[#FF009C]" />
-              </NeubrutalismButton>
+                <div className="flex justify-between items-start w-full mb-2">
+                  <span className="font-mono text-xs font-bold text-gray-400 group-hover:text-gray-300">01</span>
+                  <ArrowUpRight size={20} className="group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
+                </div>
+                <div>
+                  <span className="font-display text-xl uppercase leading-tight font-bold block mb-1">
+                    EXPLORE PRODUCTS
+                  </span>
+                  <p className="font-mono text-[11px] text-gray-500 group-hover:text-gray-300 line-clamp-2">
+                    Discover products created from recycled plastic.
+                  </p>
+                </div>
+              </button>
+
+              {/* 02 — EXPLORE MATERIALS */}
+              <button
+                onClick={() => onNavigate("material")}
+                className="bg-white text-black p-6 brutalist-border hover:bg-black hover:text-white transition-all flex flex-col justify-between text-left group min-h-[160px]"
+              >
+                <div className="flex justify-between items-start w-full mb-2">
+                  <span className="font-mono text-xs font-bold text-gray-400 group-hover:text-gray-300">02</span>
+                  <ArrowUpRight size={20} className="group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
+                </div>
+                <div>
+                  <span className="font-display text-xl uppercase leading-tight font-bold block mb-1">
+                    EXPLORE MATERIALS
+                  </span>
+                  <p className="font-mono text-[11px] text-gray-500 group-hover:text-gray-300 line-clamp-2">
+                    Discover how plastic waste becomes new material.
+                  </p>
+                </div>
+              </button>
+
+              {/* 03 — DISCOVER THE STORY */}
+              <button
+                onClick={() => onNavigate("about")}
+                className="bg-white text-black p-6 brutalist-border hover:bg-black hover:text-white transition-all flex flex-col justify-between text-left group min-h-[160px]"
+              >
+                <div className="flex justify-between items-start w-full mb-2">
+                  <span className="font-mono text-xs font-bold text-gray-400 group-hover:text-gray-300">03</span>
+                  <ArrowUpRight size={20} className="group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
+                </div>
+                <div>
+                  <span className="font-display text-xl uppercase leading-tight font-bold block mb-1">
+                    DISCOVER THE STORY
+                  </span>
+                  <p className="font-mono text-[11px] text-gray-500 group-hover:text-gray-300 line-clamp-2">
+                    Follow the journey from waste to product.
+                  </p>
+                </div>
+              </button>
+
+              {/* 04 — CREATE YOUR OWN (Nổi bật nhất) */}
+              <button
+                onClick={() => onNavigate("workshop")}
+                className="bg-[#0020D7] text-white p-6 brutalist-border hover:bg-[#FF009C] transition-all flex flex-col justify-between text-left group min-h-[160px] shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] relative overflow-hidden"
+              >
+                <div className="flex justify-between items-start w-full mb-2">
+                  <span className="font-mono text-xs font-bold text-white/70">04 — CUSTOMIZE</span>
+                  <ArrowRight size={22} className="group-hover:translate-x-1 transition-transform text-[#D1FF00]" />
+                </div>
+                <div>
+                  <span className="font-display text-xl uppercase leading-tight font-bold block mb-1 text-white">
+                    CREATE YOUR OWN
+                  </span>
+                  <p className="font-mono text-[11px] text-white/80 line-clamp-2">
+                    Experience personalized product customization and create your own unique version.
+                  </p>
+                </div>
+              </button>
             </div>
 
           </div>

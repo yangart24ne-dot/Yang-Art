@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from "react";
 import LiquidImageReveal from "../components/LiquidImageReveal";
 import FluidTextEffect from "../components/FluidTextEffect";
 import PageContainer from "../components/PageContainer";
+import PlasticFallingShapesSection from "../components/PlasticFallingShapesSection";
 import heroImg from "../assets/ảnh hiệu ứng/moi-truong-9-15431930 copy-Picsart-AiImageEnhancer copy.png";
 
 
@@ -612,9 +613,11 @@ export default function AboutUs() {
   useEffect(() => {
     const updateSizes = () => {
       const isDesktop = window.innerWidth >= 1024;
-      const gifH = isDesktop ? DESKTOP_GIF_HEIGHT : MOBILE_GIF_HEIGHT;
+      const isLaptopOrTablet = window.innerWidth >= 1024 && (window.innerWidth < 1536 || window.innerHeight < 850);
+      const maxAvailableGifH = Math.max(340, window.innerHeight - 220);
+      const gifH = isDesktop ? Math.min(DESKTOP_GIF_HEIGHT, maxAvailableGifH) : MOBILE_GIF_HEIGHT;
       const metaH = 50;
-      const letterH = isDesktop ? 380 : 120;
+      const letterH = isDesktop ? (isLaptopOrTablet ? 280 : 380) : 120;
       setLayoutSizes({
         slideDistance: gifH + metaH + CONTENT_GAP_OFFSET,
         letterHeight: letterH,
@@ -663,7 +666,7 @@ export default function AboutUs() {
       // 2. Direct GPU transform update for content wrapper
       if (contentWrapperRef.current) {
         const clampedProgress = Math.min(1, Math.max(0, progress));
-        const contentTranslateY = -clampedProgress * 60;
+        const contentTranslateY = SECTION_GAP - slideDist + (1 - clampedProgress) * (slideDist - maxScroll);
         contentWrapperRef.current.style.transform = `translate3d(0, ${contentTranslateY.toFixed(2)}px, 0)`;
       }
     };
@@ -702,13 +705,15 @@ export default function AboutUs() {
       <div
         ref={contentWrapperRef}
         style={{
+          transform: `translate3d(0, ${SECTION_GAP - layoutSizes.slideDistance}px, 0)`,
+          willChange: "transform",
           position: "relative",
           zIndex: 40,
         }}
         className="w-full bg-white"
       >
-        {/* Unified Graphic Composition Section — Asset15 defines height, photo & text overlays scale proportionally on all screens */}
-        <div className="w-full relative">
+        {/* 1. Desktop Main Section — Asset15 defines height, photo is overlay on top of Asset15 */}
+        <div className="hidden lg:block w-full relative pb-[30vw] xl:pb-[26vw] 2xl:pb-[22vw]">
 
           {/* z=10 — Asset 15 SVG: in-flow background shape defines height */}
           <div
@@ -738,7 +743,7 @@ export default function AboutUs() {
               className="absolute select-none pointer-events-none"
               style={{ left: `${ASSET18_LEFT}%`, top: `${ASSET18_TOP}%` }}
             >
-              <RethinkSvg style={{ width: `${ASSET18_SIZE * ASSET18_SCALE}%`, height: "auto" }} />
+              <RethinkSvg style={{ width: `${ASSET18_SIZE * ASSET18_SCALE}vw`, height: "auto" }} />
             </div>
 
             {/* Asset 19: PLASTIC */}
@@ -746,7 +751,7 @@ export default function AboutUs() {
               className="absolute select-none pointer-events-none"
               style={{ left: `${ASSET19_LEFT}%`, top: `${ASSET19_TOP}%` }}
             >
-              <PlasticSvg style={{ width: `${ASSET19_SIZE * ASSET19_SCALE}%`, height: "auto" }} />
+              <PlasticSvg style={{ width: `${ASSET19_SIZE * ASSET19_SCALE}vw`, height: "auto" }} />
             </div>
 
             {/* Asset 20: recreate */}
@@ -754,7 +759,7 @@ export default function AboutUs() {
               className="absolute -translate-x-1/2 -translate-y-1/2 select-none pointer-events-none"
               style={{ left: `${ASSET20_LEFT}%`, top: `${ASSET20_TOP}%` }}
             >
-              <RecreateSvg style={{ width: `${ASSET20_SIZE * ASSET20_SCALE}%`, height: "auto" }} />
+              <RecreateSvg style={{ width: `${ASSET20_SIZE * ASSET20_SCALE}vw`, height: "auto" }} />
             </div>
 
             {/* Asset 17: THE */}
@@ -762,7 +767,7 @@ export default function AboutUs() {
               className="absolute select-none pointer-events-none"
               style={{ right: `${ASSET17_RIGHT}%`, top: `${ASSET17_TOP}%` }}
             >
-              <TheSvg style={{ width: `${ASSET17_SIZE * ASSET17_SCALE}%`, height: "auto" }} />
+              <TheSvg style={{ width: `${ASSET17_SIZE * ASSET17_SCALE}vw`, height: "auto" }} />
             </div>
 
             {/* Asset 16: _FUTURE */}
@@ -770,7 +775,7 @@ export default function AboutUs() {
               className="absolute select-none pointer-events-none"
               style={{ right: `${ASSET16_RIGHT}%`, top: `${ASSET16_TOP}%` }}
             >
-              <FutureSvg style={{ width: `${ASSET16_SIZE * ASSET16_SCALE}%`, height: "auto" }} />
+              <FutureSvg style={{ width: `${ASSET16_SIZE * ASSET16_SCALE}vw`, height: "auto" }} />
             </div>
 
             {/* Asset 23: Vietnam's 1.8-Million-Ton */}
@@ -782,7 +787,7 @@ export default function AboutUs() {
                 src={asset23}
                 alt="Vietnam's 1.8-Million-Ton"
                 className="block"
-                style={{ width: `${ASSET23_SIZE * ASSET23_SCALE}%`, height: "auto" }}
+                style={{ width: `${ASSET23_SIZE * ASSET23_SCALE}vw`, height: "auto" }}
               />
             </div>
 
@@ -791,7 +796,7 @@ export default function AboutUs() {
               className="absolute select-none pointer-events-none"
               style={{ left: `${ASSET21_LEFT}%`, bottom: `${ASSET21_BOTTOM}%` }}
             >
-              <PlasticEmergencySvg style={{ width: `${ASSET21_SIZE * ASSET21_SCALE}%`, height: "auto" }} />
+              <PlasticEmergencySvg style={{ width: `${ASSET21_SIZE * ASSET21_SCALE}vw`, height: "auto" }} />
             </div>
 
             {/* Asset 22: Description */}
@@ -799,7 +804,7 @@ export default function AboutUs() {
               className="absolute select-none pointer-events-none"
               style={{ right: `${ASSET22_RIGHT}%`, bottom: `${ASSET22_BOTTOM}%` }}
             >
-              <DescriptionSvg style={{ width: `${ASSET22_SIZE * ASSET22_SCALE}%`, height: "auto" }} />
+              <DescriptionSvg style={{ width: `${ASSET22_SIZE * ASSET22_SCALE}vw`, height: "auto" }} />
             </div>
 
             {/* Asset 25: Floating Decoration Asset */}
@@ -811,7 +816,7 @@ export default function AboutUs() {
                 src={asset25}
                 alt="Floating Decoration"
                 className="block"
-                style={{ width: `${ASSET25_SIZE * ASSET25_SCALE}%`, height: "auto" }}
+                style={{ width: `${ASSET25_SIZE * ASSET25_SCALE}vw`, height: "auto" }}
               />
             </div>
 
@@ -825,7 +830,7 @@ export default function AboutUs() {
                 alt="Floating Decoration 2"
                 className="block"
                 style={{
-                  width: `${ASSET81_SIZE * ASSET81_SCALE}%`,
+                  width: `${ASSET81_SIZE * ASSET81_SCALE}vw`,
                   height: "auto",
                   transform: `rotate(${ASSET81_ROTATION}deg)`
                 }}
@@ -834,22 +839,84 @@ export default function AboutUs() {
           </div>
         </div>
 
+
+        {/* 2. Mobile / Tablet Viewport Layout (lg-hidden) - naturally scrollable globally */}
+        <PageContainer size="full" className="lg:hidden w-full relative z-10 flex flex-col items-center justify-start pt-8 pb-12 bg-transparent">
+          {/* Mobile Dripping Wave Background Shape */}
+          <div className="absolute inset-0 w-full h-full z-0 pointer-events-none">
+            <Asset15Svg />
+          </div>
+
+
+          {/* Mobile Content Wrapper */}
+          <div className="relative z-10 w-full flex flex-col items-center justify-start">
+            {/* Top Header Section (stacked bg elements) */}
+            <div className="w-full flex flex-col items-center gap-4 mt-2 mb-6 select-none">
+              <div className="flex flex-col items-center">
+                <RethinkSvg className="w-[160px] h-auto" />
+                <PlasticSvg className="w-[260px] h-auto mt-1" />
+              </div>
+
+              <RecreateSvg className="w-[220px] h-auto" />
+
+              <div className="flex flex-col items-center">
+                <TheSvg className="w-[180px] h-auto" />
+                <FutureSvg className="w-[160px] h-auto mt-1" />
+              </div>
+            </div>
+
+            {/* Arched Photo (Center) */}
+            <div className="w-full max-w-[260px] h-[320px] rounded-t-full overflow-hidden bg-transparent mb-6">
+              <LiquidImageReveal
+                src={heroImg}
+                alt="Plastic sorting emergency"
+                className="w-full h-full"
+              />
+            </div>
+
+            {/* Asset 25: Floating Decoration (Mobile) */}
+            <div className="w-[100px] h-auto mb-6 animate-float select-none pointer-events-none">
+              <img
+                src={asset25}
+                alt="Floating Decoration"
+                className="w-full h-auto block"
+              />
+            </div>
+
+            {/* Asset 81: Floating Decoration 2 (Mobile) */}
+            <div className="w-[100px] h-auto mb-6 animate-float select-none pointer-events-none">
+              <img
+                src={asset81}
+                alt="Floating Decoration 2"
+                className="w-full h-auto block"
+                style={{
+                  transform: `rotate(${ASSET81_ROTATION}deg)`
+                }}
+              />
+            </div>
+
+            {/* Text Section (Bottom) */}
+            <div className="w-full max-w-[360px] flex flex-col items-center text-center gap-4 select-none">
+              <div className="flex flex-col items-center">
+                <img
+                  src={asset23}
+                  alt="Vietnam's 1.8-Million-Ton"
+                  className="w-[200px] h-auto block"
+                />
+                <PlasticEmergencySvg className="w-[240px] h-auto mt-2" />
+              </div>
+
+              <DescriptionSvg className="w-[240px] h-auto mx-auto" />
+            </div>
+          </div>
+        </PageContainer>
+
         {/* ============================================================
           CONTENT SECTIONS — thêm nội dung mới vào đây bên dưới
           ============================================================ */}
 
-        {/* SECTION 2 — Placeholder: thêm nội dung tại đây */}
-        <PageContainer
-          as="section"
-          id="about-section-2"
-          size="wide"
-          className="min-h-screen bg-white flex flex-col items-center justify-center py-24"
-        >
-          {/* TODO: thêm content section 2 */}
-          <div className="w-full h-full flex items-center justify-center opacity-10">
-            <span className="text-black font-mono text-sm tracking-widest">SECTION 2 — DESIGN HERE</span>
-          </div>
-        </PageContainer>
+        {/* SECTION 2 — Interactive Falling Plastic Shapes & 3D Brand Physics */}
+        <PlasticFallingShapesSection />
 
         {/* SECTION 3 — Placeholder: thêm nội dung tại đây */}
         <PageContainer
